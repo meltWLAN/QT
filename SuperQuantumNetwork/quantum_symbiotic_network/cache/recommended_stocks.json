@@ -1,0 +1,112 @@
+[
+  {
+    "ts_code": "601113.SH",
+    "code": "601113",
+    "name": "华鼎股份",
+    "area": "浙江",
+    "industry": "互联网",
+    "market": "主板",
+    "list_date": "20110509",
+    "recommendation": 0.7753627482613278,
+    "reason": "量子算法推荐"
+  },
+  {
+    "ts_code": "301067.SZ",
+    "code": "301067",
+    "name": "显盈科技",
+    "area": "深圳",
+    "industry": "元器件",
+    "market": "创业板",
+    "list_date": "20210922",
+    "recommendation": 0.7646551729211613,
+    "reason": "量子算法推荐"
+  },
+  {
+    "ts_code": "301359.SZ",
+    "code": "301359",
+    "name": "东南电子",
+    "area": "浙江",
+    "industry": "元器件",
+    "market": "创业板",
+    "list_date": "20221109",
+    "recommendation": 0.6589044100186102,
+    "reason": "量子算法推荐"
+  },
+  {
+    "ts_code": "603387.SH",
+    "code": "603387",
+    "name": "基蛋生物",
+    "area": "江苏",
+    "industry": "医疗保健",
+    "market": "主板",
+    "list_date": "20170717",
+    "recommendation": 0.625161021770363,
+    "reason": "量子算法推荐"
+  },
+  {
+    "ts_code": "002194.SZ",
+    "code": "002194",
+    "name": "武汉凡谷",
+    "area": "湖北",
+    "industry": "通信设备",
+    "market": "主板",
+    "list_date": "20071207",
+    "recommendation": 0.72938483482725,
+    "reason": "量子算法推荐"
+  },
+  {
+    "ts_code": "300302.SZ",
+    "code": "300302",
+    "name": "同有科技",
+    "area": "北京",
+    "industry": "IT设备",
+    "market": "创业板",
+    "list_date": "20120321",
+    "recommendation": 0.6443394370656247,
+    "reason": "量子算法推荐"
+  },
+  {
+    "ts_code": "002491.SZ",
+    "code": "002491",
+    "name": "通鼎互联",
+    "area": "江苏",
+    "industry": "通信设备",
+    "market": "主板",
+    "list_date": "20101021",
+    "recommendation": 0.7101578800913493,
+    "reason": "量子算法推荐"
+  },
+  {
+    "ts_code": "688356.SH",
+    "code": "688356",
+    "name": "键凯科技",
+    "area": "北京",
+    "industry": "化学制药",
+    "market": "科创板",
+    "list_date": "20200826",
+    "recommendation": 0.7385550034145164,
+    "reason": "量子算法推荐"
+  },
+  {
+    "ts_code": "600855.SH",
+    "code": "600855",
+    "name": "航天长峰",
+    "area": "北京",
+    "industry": "专用机械",
+    "market": "主板",
+    "list_date": "19940425",
+    "recommendation": 0.8831631526681818,
+    "reason": "量子算法推荐"
+  },
+  {
+    "ts_code": "002845.SZ",
+    "code": "002845",
+    "name": "同兴达",
+    "area": "深圳",
+    "industry": "元器件",
+    "market": "主板",
+    "list_date": "20170125",
+    "recommendation": 0.6056004186267179,
+    "reason": "量子算法推荐"
+  }
+]

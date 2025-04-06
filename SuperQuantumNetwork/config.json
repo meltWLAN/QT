@@ -1,0 +1,68 @@
+{
+  "use_cache": true,
+  "cache_dir": "data/cache",
+  "sample_size": 50,
+  "transaction_fee_rate": 0.0003,
+  "slippage": 0.0001,
+  "risk_free_rate": 0.03,
+  "tushare_token": "",
+  "network_config": {
+    "use_strategy_ensemble": true,
+    "fractal_network": {
+      "micro_agents_per_segment": 5,
+      "self_modify_interval": 100
+    },
+    "quantum_trading": {
+      "collapse_threshold": 0.5,
+      "uncertainty_decay": 0.95
+    },
+    "neural_evolution": {
+      "learning_rate": 0.01,
+      "batch_size": 32
+    }
+  },
+  "data_config": {
+    "use_enhanced_data": true,
+    "include_fundamental": true,
+    "include_macro": true,
+    "include_sentiment": true,
+    "technical_indicators": {
+      "use_advanced_indicators": true,
+      "custom_indicators": ["rsi_change", "bb_width", "momentum", "adx", "k_value", "d_value", "j_value"]
+    },
+    "data_update_interval": 1
+  },
+  "model_config": {
+    "deep_predictor": {
+      "sequence_length": 20,
+      "prediction_horizon": 5,
+      "batch_size": 64,
+      "epochs": 50,
+      "dropout_rate": 0.2,
+      "learning_rate": 0.001,
+      "validation_split": 0.2,
+      "retrain_interval": 7
+    }
+  },
+  "risk_config": {
+    "max_position_size": 0.2,
+    "max_portfolio_risk": 0.05,
+    "max_drawdown_limit": 0.15,
+    "position_sizing_method": "kelly",
+    "kelly_fraction": 0.5,
+    "stop_loss_atr_multiple": 2.0,
+    "take_profit_atr_multiple": 3.0,
+    "trailing_stop_activation": 0.03,
+    "trailing_stop_distance": 0.02,
+    "var_confidence_level": 0.95,
+    "max_correlation": 0.7,
+    "max_positions": 10
+  },
+  "backtest_config": {
+    "start_date": "",
+    "end_date": "",
+    "initial_capital": 1000000,
+    "benchmark": "000001.SH",
+    "rebalance_interval": 5
+  }
+} 
