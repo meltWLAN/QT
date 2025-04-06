@@ -1,32 +1,32 @@
 """
-量子共生网络 - 核心组件
-包含系统的核心功能模块
+量子共生网络系统 - 核心模块
+Copyright (c) 2023-2025 QuantumSymbioticNetworks
 """
 
-from quantum_symbiotic_network.core.fractal_intelligence import (
-    Agent, MicroAgent, MidAgent, MetaAgent, FractalIntelligenceNetwork
-)
-from quantum_symbiotic_network.core.quantum_probability import (
-    QuantumState, QuantumProbabilityFramework
-)
-from quantum_symbiotic_network.core.self_evolving_neural import (
-    NeuralNode, SelfEvolvingNetwork
-)
-
-# 导入核心组件
-from .decision_engine import SuperGodDecisionEngine
-from .market_analyzer import SuperMarketAnalyzer
-from .position_manager import SuperPositionManager
-from .risk_manager import SuperRiskManager
+from .quantum_probability import QuantumProbabilityFramework, QuantumState
+from .decision_engine import DecisionEngine
+from .market_analyzer import MarketAnalyzer
+from .position_manager import PositionManager
+from .risk_management import RiskManager, RiskProfile
+from .self_evolving_neural import SelfEvolvingNetwork, NeuralNode
+from .fractal_intelligence import FractalIntelligence
 from .sentiment_analyzer import SentimentAnalyzer
+from .quantum_entanglement_engine import QuantumEntanglementEngine, EntanglementProperty
+
+__version__ = "0.2.1"
 
 __all__ = [
-    'Agent', 'MicroAgent', 'MidAgent', 'MetaAgent', 'FractalIntelligenceNetwork',
-    'QuantumState', 'QuantumProbabilityFramework',
-    'NeuralNode', 'SelfEvolvingNetwork',
-    'SuperGodDecisionEngine',
-    'SuperMarketAnalyzer',
-    'SuperPositionManager',
-    'SuperRiskManager',
-    'SentimentAnalyzer'
+    'QuantumProbabilityFramework',
+    'QuantumState',
+    'DecisionEngine',
+    'MarketAnalyzer',
+    'PositionManager',
+    'RiskManager',
+    'RiskProfile',
+    'SelfEvolvingNetwork',
+    'NeuralNode',
+    'FractalIntelligence',
+    'SentimentAnalyzer',
+    'QuantumEntanglementEngine',
+    'EntanglementProperty'
 ] 
