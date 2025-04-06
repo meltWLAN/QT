@@ -1,652 +1,534 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
-量子纠缠引擎 - 高级量子纠缠计算和市场共振分析
-实现多维度量子纠缠状态处理，提高市场预测准确度
+量子纠缠预测引擎 - 超神系统核心模块
+基于复数量子态的多维度预测引擎
 """
 
 import numpy as np
-import scipy.linalg as la
-from typing import Dict, List, Tuple, Any, Optional, Union, Set
 import logging
+from typing import Dict, List, Tuple, Any, Optional
 from datetime import datetime
-import uuid
+import json
+import os
+import random
 import math
-from dataclasses import dataclass, field
 
-# 设置日志
 logger = logging.getLogger(__name__)
 
-@dataclass
-class EntanglementProperty:
-    """量子纠缠性质"""
-    # 纠缠强度（0-1）
-    strength: float = 0.0
-    # 纠缠相位
-    phase: float = 0.0
-    # 共振频率
-    resonance_frequency: float = 0.0
-    # 相关性历史
-    correlation_history: List[float] = field(default_factory=list)
-    # 最后更新时间
-    last_updated: datetime = field(default_factory=datetime.now)
-    # 量子效率
-    efficiency: float = 0.0
-    # 纠缠半衰期（小时）
-    half_life: float = 24.0
-    
-    def update_strength(self, new_correlation: float, alpha: float = 0.3) -> None:
-        """更新纠缠强度，使用指数移动平均"""
-        if self.strength == 0.0:
-            self.strength = new_correlation
-        else:
-            self.strength = alpha * new_correlation + (1 - alpha) * self.strength
-        
-        # 记录历史
-        self.correlation_history.append(new_correlation)
-        if len(self.correlation_history) > 100:  # 限制历史记录长度
-            self.correlation_history.pop(0)
-            
-        # 更新时间
-        self.last_updated = datetime.now()
-    
-    def calculate_efficiency(self) -> float:
-        """计算纠缠效率 - 基于历史稳定性"""
-        if len(self.correlation_history) < 3:
-            return 0.5
-        
-        # 计算相关性的稳定性（标准差的倒数）
-        std = np.std(self.correlation_history[-10:]) if len(self.correlation_history) >= 10 else np.std(self.correlation_history)
-        stability = 1.0 / (1.0 + std * 10)  # 标准化到0-1
-        
-        # 计算纠缠效率
-        self.efficiency = self.strength * stability
-        return self.efficiency
-    
-    def decay(self, hours_passed: float) -> None:
-        """纠缠强度随时间衰减"""
-        if hours_passed <= 0:
-            return
-            
-        # 计算衰减因子
-        decay_factor = math.pow(0.5, hours_passed / self.half_life)
-        self.strength *= decay_factor
-
-
 class QuantumEntanglementEngine:
-    """高级量子纠缠引擎，提高市场预测准确度"""
+    """量子纠缠预测引擎"""
     
-    def __init__(self, dimensions=12, depth=7, config: Dict[str, Any] = None):
+    def __init__(self, dimensions=8, learning_rate=0.01, entanglement_factor=0.3):
         """
         初始化量子纠缠引擎
         
         Args:
-            dimensions: 量子空间维度，捕捉更多市场特征
-            depth: 量子电路深度，提高预测的时间跨度
-            config: 配置参数
+            dimensions: 量子态维度
+            learning_rate: 学习率
+            entanglement_factor: 纠缠因子，控制实体间的量子纠缠强度
         """
         self.dimensions = dimensions
-        self.depth = depth
-        self.config = config or {}
+        self.learning_rate = learning_rate
+        self.entanglement_factor = entanglement_factor
         
-        # 纠缠矩阵 - 存储资产间的纠缠关系
-        self.entanglement_matrix: Dict[Tuple[str, str], EntanglementProperty] = {}
+        # 存储所有实体的量子态
+        self.quantum_states = {}
         
-        # 资产的量子状态
-        self.quantum_states: Dict[str, np.ndarray] = {}
+        # 存储实体间的纠缠关系
+        self.entanglement_matrix = {}
         
-        # 市场共振状态
-        self.resonance_state: Dict[str, float] = {}
+        # 预测历史记录
+        self.prediction_history = {}
         
-        # 纠缠群组 - 存储高度纠缠的资产群组
-        self.entanglement_clusters: List[Set[str]] = []
+        # 初始化随机数生成器
+        np.random.seed(datetime.now().microsecond)
         
-        # 相位参考
-        self.phase_reference = np.random.random() * 2 * np.pi
-        
-        # 量子共振频率
-        self.base_resonance_frequency = config.get("base_resonance_frequency", 0.1)
-        
-        logger.info(f"量子纠缠引擎初始化完成，维度={dimensions}，深度={depth}")
+        logger.info(f"量子纠缠预测引擎初始化完成: 维度={dimensions}, 纠缠因子={entanglement_factor}")
     
-    def initialize_entanglement(self, assets: List[str], 
-                              correlation_matrix: Optional[Dict[Tuple[str, str], float]] = None) -> None:
+    def _initialize_quantum_state(self, entity_id):
         """
-        初始化量子纠缠矩阵
+        为实体初始化量子态
         
         Args:
-            assets: 资产列表
-            correlation_matrix: 相关性矩阵，如果为None则根据资产ID初始化
+            entity_id: 实体ID (如股票代码)
+            
+        Returns:
+            初始化的量子态（复数数组）
         """
-        logger.info(f"初始化量子纠缠矩阵，共{len(assets)}个资产")
+        # 创建复数量子态
+        # 实部和虚部都是随机初始化的
+        real_part = np.random.normal(0, 1, self.dimensions)
+        imag_part = np.random.normal(0, 1, self.dimensions)
         
-        # 初始化资产的量子状态
-        for asset in assets:
-            self._initialize_quantum_state(asset)
+        quantum_state = real_part + 1j * imag_part
         
-        # 初始化纠缠关系
-        for i, asset_i in enumerate(assets):
-            for j, asset_j in enumerate(assets):
-                if i != j:
-                    pair = (asset_i, asset_j)
-                    
-                    # 获取初始相关性
-                    if correlation_matrix and pair in correlation_matrix:
-                        initial_correlation = abs(correlation_matrix[pair])
-                    else:
-                        # 根据资产ID生成一个初始相关性
-                        seed = hash(asset_i + asset_j) % 1000 / 1000.0
-                        initial_correlation = 0.1 + seed * 0.3  # 0.1-0.4的范围
-                    
-                    # 创建纠缠属性
-                    entanglement = EntanglementProperty(
-                        strength=initial_correlation,
-                        phase=np.random.random() * 2 * np.pi,
-                        resonance_frequency=self.base_resonance_frequency * (0.8 + 0.4 * np.random.random()),
-                        correlation_history=[initial_correlation],
-                        efficiency=0.5,
-                        half_life=12.0 + np.random.random() * 36.0  # 12-48小时不等
-                    )
-                    
-                    self.entanglement_matrix[pair] = entanglement
-        
-        # 更新纠缠群组
-        self._update_entanglement_clusters(threshold=0.3)
-        
-        logger.info(f"量子纠缠矩阵初始化完成，包含{len(self.entanglement_matrix)}个纠缠关系")
+        # 归一化量子态
+        norm = np.sqrt(np.sum(np.abs(quantum_state) ** 2))
+        if norm > 0:
+            quantum_state = quantum_state / norm
+            
+        self.quantum_states[entity_id] = quantum_state
+        return quantum_state
     
-    def _initialize_quantum_state(self, asset: str) -> None:
+    def _apply_quantum_transformation(self, quantum_state, input_data):
         """
-        初始化资产的量子状态
+        应用量子变换到量子态
         
         Args:
-            asset: 资产ID
+            quantum_state: 当前量子态
+            input_data: 输入数据字典
+            
+        Returns:
+            变换后的量子态
         """
-        # 创建一个随机的量子态矢量（复数向量）
-        state = np.random.normal(0, 1, (self.dimensions, 2))
-        complex_state = state[:, 0] + 1j * state[:, 1]
+        # 创建量子门（变换矩阵）
+        transformation_matrix = np.eye(self.dimensions, dtype=complex)
+        
+        # 处理输入数据中的各个特征
+        for feature, value in input_data.items():
+            # 根据特征和值计算相位变化
+            phase_shift = value * np.pi * 0.1  # 缩放到合理范围
+            
+            # 为不同特征选择不同的量子门行为
+            if feature == 'price_change':
+                # 价格变化使用旋转门
+                rotation_idx = 0
+                transformation_matrix[rotation_idx, rotation_idx] = np.cos(phase_shift) + 0j
+                rotation_idx2 = 1
+                transformation_matrix[rotation_idx, rotation_idx2] = -np.sin(phase_shift) + 0j
+                transformation_matrix[rotation_idx2, rotation_idx] = np.sin(phase_shift) + 0j
+                transformation_matrix[rotation_idx2, rotation_idx2] = np.cos(phase_shift) + 0j
+            
+            elif feature == 'volume_change':
+                # 成交量变化使用相位门
+                phase_idx = 2
+                transformation_matrix[phase_idx, phase_idx] = np.exp(1j * phase_shift)
+            
+            elif feature == 'ma5_diff':
+                # 5日均线差异使用相位门
+                phase_idx = 3
+                transformation_matrix[phase_idx, phase_idx] = np.exp(1j * phase_shift)
+            
+            elif feature == 'ma10_diff':
+                # 10日均线差异使用相位门
+                phase_idx = 4
+                transformation_matrix[phase_idx, phase_idx] = np.exp(1j * phase_shift)
+            
+            elif feature == 'ma20_diff':
+                # 20日均线差异使用相位门
+                phase_idx = 5
+                transformation_matrix[phase_idx, phase_idx] = np.exp(1j * phase_shift)
+            
+            elif feature == 'volatility':
+                # 波动率使用哈达玛门混合
+                had_idx = 6
+                transformation_matrix[had_idx, had_idx] = np.cos(phase_shift) + 0j
+                had_idx2 = 7
+                if had_idx2 < self.dimensions:
+                    transformation_matrix[had_idx, had_idx2] = np.sin(phase_shift) + 0j
+                    transformation_matrix[had_idx2, had_idx] = np.sin(phase_shift) + 0j
+                    transformation_matrix[had_idx2, had_idx2] = -np.cos(phase_shift) + 0j
+            
+            # 自适应门：对于未指定的特征，动态分配量子门
+            else:
+                # 通过特征名的哈希值确定索引，确保相同特征总是使用相同的门
+                feat_hash = abs(hash(feature)) % (self.dimensions - 1)
+                transformation_matrix[feat_hash, feat_hash] = np.exp(1j * phase_shift)
+        
+        # 应用变换矩阵到量子态
+        transformed_state = np.dot(transformation_matrix, quantum_state)
         
         # 归一化
-        norm = np.sqrt(np.sum(np.abs(complex_state) ** 2))
+        norm = np.sqrt(np.sum(np.abs(transformed_state) ** 2))
         if norm > 0:
-            complex_state = complex_state / norm
-        
-        self.quantum_states[asset] = complex_state
+            transformed_state = transformed_state / norm
+            
+        return transformed_state
     
-    def update_correlations(self, new_correlations: Dict[Tuple[str, str], float]) -> None:
+    def _apply_entanglement(self, entity_id, quantum_state):
         """
-        更新资产间的相关性
+        应用量子纠缠效应
         
         Args:
-            new_correlations: 新的相关性矩阵 {(asset_i, asset_j): correlation}
+            entity_id: 当前实体ID
+            quantum_state: 当前量子态
+            
+        Returns:
+            考虑纠缠后的量子态
         """
-        # 当前时间
-        now = datetime.now()
-        
-        # 更新纠缠矩阵
-        for pair, correlation in new_correlations.items():
-            asset_i, asset_j = pair
-            correlation_value = abs(correlation)  # 使用相关性的绝对值
+        # 如果没有纠缠关系，直接返回
+        if entity_id not in self.entanglement_matrix:
+            return quantum_state
             
-            # 检查是否需要创建新的纠缠关系
-            if pair not in self.entanglement_matrix:
-                self.entanglement_matrix[pair] = EntanglementProperty(
-                    strength=correlation_value,
-                    phase=np.random.random() * 2 * np.pi,
-                    resonance_frequency=self.base_resonance_frequency * (0.8 + 0.4 * np.random.random()),
-                    correlation_history=[correlation_value],
-                    efficiency=0.5
-                )
-                continue
-            
-            # 获取现有纠缠属性
-            entanglement = self.entanglement_matrix[pair]
-            
-            # 计算时间衰减
-            hours_passed = (now - entanglement.last_updated).total_seconds() / 3600.0
-            entanglement.decay(hours_passed)
-            
-            # 更新纠缠强度
-            entanglement.update_strength(correlation_value)
-            
-            # 计算纠缠效率
-            entanglement.calculate_efficiency()
-            
-            # 更新共振频率 - 随相关性波动
-            frequency_shift = (correlation_value - entanglement.strength) * 0.1
-            entanglement.resonance_frequency += frequency_shift
-            entanglement.resonance_frequency = max(0.01, min(0.5, entanglement.resonance_frequency))
+        # 获取所有与当前实体纠缠的实体
+        entangled_entities = self.entanglement_matrix[entity_id]
         
-        # 更新纠缠群组
-        self._update_entanglement_clusters()
+        # 累积纠缠效应
+        entanglement_effect = np.zeros(self.dimensions, dtype=complex)
         
-        logger.debug(f"已更新{len(new_correlations)}个纠缠关系")
-    
-    def _update_entanglement_clusters(self, threshold: float = 0.5) -> None:
-        """
-        更新纠缠群组，将高度纠缠的资产归为同一群组
-        
-        Args:
-            threshold: 纠缠强度阈值，超过此值的资产对被视为高度纠缠
-        """
-        # 收集所有资产
-        all_assets = set()
-        for pair in self.entanglement_matrix:
-            all_assets.add(pair[0])
-            all_assets.add(pair[1])
-        
-        # 构建邻接矩阵
-        adjacency = {asset: set() for asset in all_assets}
-        for (asset_i, asset_j), entanglement in self.entanglement_matrix.items():
-            if entanglement.strength >= threshold:
-                adjacency[asset_i].add(asset_j)
-                adjacency[asset_j].add(asset_i)
-        
-        # 找出所有连通分量（群组）
-        visited = set()
-        self.entanglement_clusters = []
-        
-        for asset in all_assets:
-            if asset not in visited:
-                cluster = set()
-                queue = [asset]
-                visited.add(asset)
+        for other_id, strength in entangled_entities.items():
+            if other_id in self.quantum_states:
+                other_state = self.quantum_states[other_id]
                 
-                while queue:
-                    current = queue.pop(0)
-                    cluster.add(current)
-                    
-                    for neighbor in adjacency[current]:
-                        if neighbor not in visited:
-                            visited.add(neighbor)
-                            queue.append(neighbor)
-                
-                if len(cluster) > 1:  # 只保留至少有两个资产的群组
-                    self.entanglement_clusters.append(cluster)
+                # 计算纠缠效应（加权和）
+                entanglement_effect += other_state * strength
         
-        logger.debug(f"更新了纠缠群组，共{len(self.entanglement_clusters)}个群组")
-    
-    def apply_quantum_operations(self, market_data: Dict[str, Any]) -> None:
-        """
-        应用量子门操作，演化量子状态
-        
-        Args:
-            market_data: 市场数据
-        """
-        # 获取所有资产
-        assets = list(self.quantum_states.keys())
-        
-        # 应用单量子比特门操作
-        for asset in assets:
-            if asset in market_data:
-                asset_data = market_data[asset]
-                # 根据市场数据调整量子态
-                self._apply_single_qubit_gate(asset, asset_data)
-        
-        # 应用两量子比特门操作（纠缠门）
-        for (asset_i, asset_j), entanglement in self.entanglement_matrix.items():
-            if asset_i in assets and asset_j in assets:
-                self._apply_entanglement_gate(asset_i, asset_j, entanglement)
-        
-        # 应用多量子比特门操作（群组操作）
-        for cluster in self.entanglement_clusters:
-            cluster_assets = list(cluster)
-            if len(cluster_assets) >= 3:  # 至少需要3个资产
-                self._apply_cluster_operation(cluster_assets)
-    
-    def _apply_single_qubit_gate(self, asset: str, asset_data: Dict[str, Any]) -> None:
-        """
-        应用单量子比特门，根据市场数据调整量子态
-        
-        Args:
-            asset: 资产ID
-            asset_data: 资产市场数据
-        """
-        # 获取当前量子态
-        state = self.quantum_states[asset]
-        
-        # 根据价格变化应用旋转门
-        price_change = asset_data.get("price_change_pct", 0.0)
-        angle = price_change * np.pi * 0.1  # 将价格变化转换为旋转角度
-        
-        # 构造旋转矩阵（在第一个维度上）
-        rotation = np.eye(self.dimensions, dtype=complex)
-        rotation[0, 0] = np.cos(angle) + 0j
-        rotation[0, 1] = -np.sin(angle) + 0j
-        rotation[1, 0] = np.sin(angle) + 0j
-        rotation[1, 1] = np.cos(angle) + 0j
-        
-        # 应用旋转
-        new_state = rotation @ state
-        
-        # 根据成交量应用相位门
-        volume = asset_data.get("volume_relative", 1.0)
-        phase_angle = volume * np.pi * 0.2
-        
-        # 构造相位矩阵
-        phase = np.eye(self.dimensions, dtype=complex)
-        phase[1, 1] = np.exp(1j * phase_angle)
-        
-        # 应用相位
-        new_state = phase @ new_state
+        # 归一化纠缠效应
+        norm = np.sqrt(np.sum(np.abs(entanglement_effect) ** 2))
+        if norm > 0:
+            entanglement_effect = entanglement_effect / norm
+            
+        # 将纠缠效应与原量子态混合
+        # 使用纠缠因子控制混合比例
+        mixed_state = quantum_state * (1 - self.entanglement_factor) + entanglement_effect * self.entanglement_factor
         
         # 归一化
-        norm = np.sqrt(np.sum(np.abs(new_state) ** 2))
+        norm = np.sqrt(np.sum(np.abs(mixed_state) ** 2))
         if norm > 0:
-            new_state = new_state / norm
-        
-        # 更新量子态
-        self.quantum_states[asset] = new_state
+            mixed_state = mixed_state / norm
+            
+        return mixed_state
     
-    def _apply_entanglement_gate(self, asset_i: str, asset_j: str, 
-                               entanglement: EntanglementProperty) -> None:
+    def _calculate_prediction(self, quantum_state):
         """
-        应用纠缠门，调整两个资产间的量子纠缠
+        计算预测结果
         
         Args:
-            asset_i: 第一个资产
-            asset_j: 第二个资产
-            entanglement: 纠缠属性
-        """
-        # 获取当前量子态
-        state_i = self.quantum_states[asset_i]
-        state_j = self.quantum_states[asset_j]
-        
-        # 纠缠强度
-        strength = entanglement.strength
-        
-        # 创建CNOT类似的门（根据纠缠强度）
-        # 当第一个资产的第一个维度为主导时，翻转第二个资产的第一个维度
-        if abs(state_i[0]) > 0.7:
-            # 构造翻转矩阵
-            flip = np.eye(self.dimensions, dtype=complex)
-            flip[0, 0] = np.cos(strength * np.pi / 2)
-            flip[0, 1] = np.sin(strength * np.pi / 2)
-            flip[1, 0] = np.sin(strength * np.pi / 2)
-            flip[1, 1] = np.cos(strength * np.pi / 2)
-            
-            # 应用到第二个资产
-            new_state_j = flip @ state_j
-            
-            # 归一化
-            norm = np.sqrt(np.sum(np.abs(new_state_j) ** 2))
-            if norm > 0:
-                new_state_j = new_state_j / norm
-            
-            # 更新量子态
-            self.quantum_states[asset_j] = new_state_j
-        
-        # 相位纠缠 - 根据两个资产的相对相位调整
-        phase_diff = np.angle(state_i[0]) - np.angle(state_j[0])
-        if abs(phase_diff) < 0.5:  # 相位接近时增强纠缠
-            # 增加纠缠强度
-            entanglement.strength = min(1.0, entanglement.strength * 1.01)
-        else:  # 相位差距大时减弱纠缠
-            # 减少纠缠强度
-            entanglement.strength = max(0.1, entanglement.strength * 0.99)
-    
-    def _apply_cluster_operation(self, assets: List[str]) -> None:
-        """
-        应用群组量子操作，处理高度纠缠的资产群组
-        
-        Args:
-            assets: 资产列表
-        """
-        if len(assets) < 3:
-            return
-            
-        # 收集所有量子态
-        states = [self.quantum_states[asset] for asset in assets]
-        
-        # 计算群组平均相位
-        avg_phase = np.mean([np.angle(state[0]) for state in states])
-        
-        # 计算与平均相位的偏差
-        for i, asset in enumerate(assets):
-            state = states[i]
-            phase_diff = np.angle(state[0]) - avg_phase
-            
-            # 应用相位调整，使群组更加同步
-            adjustment = -phase_diff * 0.1  # 小幅调整，避免过度同步
-            phase = np.exp(1j * adjustment)
-            
-            # 只调整第一个维度
-            new_state = state.copy()
-            new_state[0] = state[0] * phase
-            
-            # 归一化
-            norm = np.sqrt(np.sum(np.abs(new_state) ** 2))
-            if norm > 0:
-                new_state = new_state / norm
-            
-            # 更新量子态
-            self.quantum_states[asset] = new_state
-    
-    def compute_market_resonance(self, market_data: Dict[str, Any]) -> Dict[str, float]:
-        """
-        计算市场共振状态，识别市场异常模式
-        
-        Args:
-            market_data: 市场数据
+            quantum_state: 量子态
             
         Returns:
-            市场共振状态评分字典
+            预测结果字典，包含方向、强度和置信度
         """
-        # 重置共振状态
-        self.resonance_state = {}
+        # 分离量子态的实部和虚部
+        real_part = np.real(quantum_state)
+        imag_part = np.imag(quantum_state)
         
-        # 计算整体市场相位
-        market_phase = self._compute_global_phase(market_data)
-        
-        # 更新全局相位参考
-        phase_diff = market_phase - self.phase_reference
-        self.phase_reference = market_phase
-        
-        # 计算每个资产的共振度
-        for asset, state in self.quantum_states.items():
-            # 资产相位与市场相位的关系
-            asset_phase = np.angle(state[0])
-            phase_alignment = 1.0 - abs(np.sin((asset_phase - market_phase) / 2))
+        # 计算方向（实部的加权和）
+        direction_weights = np.array([0.3, 0.2, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05])
+        if len(direction_weights) > len(real_part):
+            direction_weights = direction_weights[:len(real_part)]
+        elif len(direction_weights) < len(real_part):
+            additional_weights = np.ones(len(real_part) - len(direction_weights)) * 0.05
+            direction_weights = np.concatenate([direction_weights, additional_weights])
+            direction_weights = direction_weights / np.sum(direction_weights)  # 重新归一化
             
-            # 量子态的熵 - 低熵表示更确定的状态
-            probabilities = np.abs(state) ** 2
-            entropy = -np.sum(probabilities * np.log2(probabilities + 1e-10))
-            entropy_factor = 1.0 - entropy / np.log2(self.dimensions)
-            
-            # 计算资产的共振评分
-            resonance = phase_alignment * entropy_factor
-            
-            # 应用市场数据因子
-            if asset in market_data:
-                volume_factor = market_data[asset].get("volume_relative", 1.0)
-                momentum = market_data[asset].get("momentum", 0.0)
-                
-                # 量化动量对共振的影响
-                momentum_factor = 0.5 + 0.5 * min(1.0, abs(momentum) / 3.0)
-                
-                # 调整共振度
-                resonance = resonance * volume_factor * momentum_factor
-            
-            # 记录共振状态
-            self.resonance_state[asset] = resonance
+        # 计算方向分数（正值表示上涨，负值表示下跌）
+        direction = np.sum(real_part * direction_weights)
         
-        # 识别异常共振模式
-        self._detect_resonance_anomalies()
+        # 使用量子态的模计算预测强度（0-1之间）
+        # 使用前4个维度的幅度平均值
+        amplitudes = np.abs(quantum_state[:4]) if len(quantum_state) >= 4 else np.abs(quantum_state)
+        strength = np.mean(amplitudes)
         
-        return self.resonance_state
-    
-    def _compute_global_phase(self, market_data: Dict[str, Any]) -> float:
-        """
-        计算全局市场相位
+        # 计算置信度（量子态的相干性）
+        # 量子态越纯粹，置信度越高
+        coherence = 0
+        for i in range(len(quantum_state)):
+            for j in range(i+1, len(quantum_state)):
+                coherence += np.abs(quantum_state[i] * np.conj(quantum_state[j]))
         
-        Args:
-            market_data: 市场数据
-            
-        Returns:
-            市场全局相位
-        """
-        # 获取所有资产的价格变化
-        price_changes = []
-        for asset, data in market_data.items():
-            if asset in self.quantum_states:
-                change = data.get("price_change_pct", 0.0)
-                price_changes.append(change)
-        
-        if not price_changes:
-            return self.phase_reference
-        
-        # 计算平均价格变化和标准差
-        mean_change = np.mean(price_changes)
-        std_change = np.std(price_changes) if len(price_changes) > 1 else 0.01
-        
-        # 将价格变化转换为相位变化
-        phase_change = mean_change * np.pi / (std_change + 0.01)
-        
-        # 更新全局相位
-        new_phase = self.phase_reference + phase_change
-        return new_phase % (2 * np.pi)
-    
-    def _detect_resonance_anomalies(self) -> Dict[str, float]:
-        """
-        检测共振异常，识别潜在的市场异常
-        
-        Returns:
-            异常评分字典
-        """
-        # 计算共振度分布
-        values = list(self.resonance_state.values())
-        if not values:
-            return {}
-            
-        mean_resonance = np.mean(values)
-        std_resonance = np.std(values) if len(values) > 1 else 0.1
-        
-        # 识别异常共振的资产
-        anomalies = {}
-        for asset, resonance in self.resonance_state.items():
-            # 计算z-分数
-            z_score = (resonance - mean_resonance) / std_resonance if std_resonance > 0 else 0
-            
-            # 高于2个标准差视为异常
-            if abs(z_score) > 2.0:
-                anomalies[asset] = z_score
-        
-        # 记录异常
-        if anomalies:
-            logger.info(f"检测到{len(anomalies)}个共振异常: {anomalies}")
-        
-        return anomalies
-    
-    def predict_market_movement(self, assets: List[str]) -> Dict[str, Dict[str, float]]:
-        """
-        基于量子纠缠状态预测市场走势
-        
-        Args:
-            assets: 需要预测的资产列表
-            
-        Returns:
-            预测结果字典 {资产: {方向: 概率, 强度: 强度值}}
-        """
-        predictions = {}
-        
-        for asset in assets:
-            if asset not in self.quantum_states:
-                continue
-                
-            state = self.quantum_states[asset]
-            
-            # 使用量子态的前两个维度预测方向
-            up_probability = abs(state[0]) ** 2
-            down_probability = abs(state[1]) ** 2
-            
-            # 归一化
-            total = up_probability + down_probability
-            if total > 0:
-                up_probability /= total
-                down_probability /= total
-            
-            # 方向 - 上涨概率与下跌概率的差值
-            direction = up_probability - down_probability
-            
-            # 强度 - 基于量子态的确定性
-            probabilities = np.abs(state) ** 2
-            entropy = -np.sum(probabilities * np.log2(probabilities + 1e-10))
-            max_entropy = np.log2(self.dimensions)
-            certainty = 1.0 - entropy / max_entropy
-            
-            # 应用共振因子
-            resonance = self.resonance_state.get(asset, 0.5)
-            strength = certainty * (0.5 + 0.5 * resonance)
-            
-            # 创建预测结果
-            predictions[asset] = {
-                "direction": direction,
-                "strength": strength,
-                "up_probability": up_probability,
-                "down_probability": down_probability,
-                "resonance": resonance
-            }
-        
-        return predictions
-    
-    def get_entanglement_network(self) -> Dict[str, Any]:
-        """
-        获取纠缠网络状态，用于可视化
-        
-        Returns:
-            纠缠网络状态信息
-        """
-        # 收集所有资产
-        all_assets = set()
-        for pair in self.entanglement_matrix:
-            all_assets.add(pair[0])
-            all_assets.add(pair[1])
-        
-        # 创建节点数据
-        nodes = []
-        for asset in all_assets:
-            # 计算节点的共振度
-            resonance = self.resonance_state.get(asset, 0.5)
-            
-            # 获取量子态
-            state = self.quantum_states.get(asset, np.zeros(self.dimensions))
-            
-            # 从量子态计算方向倾向
-            direction = 0.0
-            if len(state) >= 2:
-                up_prob = abs(state[0]) ** 2
-                down_prob = abs(state[1]) ** 2
-                total = up_prob + down_prob
-                if total > 0:
-                    direction = (up_prob - down_prob) / total
-            
-            nodes.append({
-                "id": asset,
-                "resonance": resonance,
-                "direction": direction
-            })
-        
-        # 创建边数据
-        edges = []
-        for (asset_i, asset_j), entanglement in self.entanglement_matrix.items():
-            if entanglement.strength > 0.1:  # 只显示有意义的纠缠
-                edges.append({
-                    "source": asset_i,
-                    "target": asset_j,
-                    "strength": entanglement.strength,
-                    "efficiency": entanglement.efficiency
-                })
-        
-        # 创建群组数据
-        clusters = []
-        for i, cluster in enumerate(self.entanglement_clusters):
-            clusters.append({
-                "id": i,
-                "assets": list(cluster),
-                "size": len(cluster)
-            })
+        # 归一化置信度到0-1之间
+        max_coherence = (len(quantum_state) * (len(quantum_state) - 1)) / 2
+        confidence = coherence / max_coherence if max_coherence > 0 else 0
         
         return {
-            "nodes": nodes,
-            "edges": edges,
-            "clusters": clusters,
-            "timestamp": datetime.now().isoformat()
-        } 
+            'predicted_direction': direction,  # 预测方向（>0上涨，<0下跌）
+            'prediction_strength': strength,    # 预测强度（0-1）
+            'confidence': confidence,           # 置信度（0-1）
+            'quantum_amplitudes': list(np.abs(quantum_state)),  # 量子态幅度
+            'quantum_phases': list(np.angle(quantum_state))     # 量子态相位
+        }
+    
+    def add_entanglement(self, entity_id1, entity_id2, strength=None):
+        """
+        添加两个实体之间的量子纠缠关系
+        
+        Args:
+            entity_id1: 第一个实体ID
+            entity_id2: 第二个实体ID
+            strength: 纠缠强度（如果为None则随机生成）
+            
+        Returns:
+            纠缠强度
+        """
+        # 如果强度未指定，生成随机强度（0.1-0.5之间）
+        if strength is None:
+            strength = random.uniform(0.1, 0.5)
+            
+        # 确保实体存在量子态
+        if entity_id1 not in self.quantum_states:
+            self._initialize_quantum_state(entity_id1)
+            
+        if entity_id2 not in self.quantum_states:
+            self._initialize_quantum_state(entity_id2)
+            
+        # 更新纠缠矩阵
+        if entity_id1 not in self.entanglement_matrix:
+            self.entanglement_matrix[entity_id1] = {}
+            
+        if entity_id2 not in self.entanglement_matrix:
+            self.entanglement_matrix[entity_id2] = {}
+            
+        # 双向纠缠（对称）
+        self.entanglement_matrix[entity_id1][entity_id2] = strength
+        self.entanglement_matrix[entity_id2][entity_id1] = strength
+        
+        logger.debug(f"添加纠缠关系: {entity_id1} <--> {entity_id2}, 强度={strength:.4f}")
+        
+        return strength
+    
+    def predict(self, input_data, entity_id, current_state=None):
+        """
+        执行量子预测
+        
+        Args:
+            input_data: 输入数据（特征字典）
+            entity_id: 实体ID
+            current_state: 当前状态（可选）
+            
+        Returns:
+            预测结果
+        """
+        # 获取或初始化量子态
+        if entity_id in self.quantum_states:
+            quantum_state = self.quantum_states[entity_id]
+        else:
+            quantum_state = self._initialize_quantum_state(entity_id)
+            
+        # 应用量子变换
+        transformed_state = self._apply_quantum_transformation(quantum_state, input_data)
+        
+        # 应用量子纠缠
+        entangled_state = self._apply_entanglement(entity_id, transformed_state)
+        
+        # 更新量子态
+        self.quantum_states[entity_id] = entangled_state
+        
+        # 计算预测结果
+        prediction = self._calculate_prediction(entangled_state)
+        
+        # 记录预测历史
+        if entity_id not in self.prediction_history:
+            self.prediction_history[entity_id] = []
+            
+        self.prediction_history[entity_id].append({
+            'timestamp': datetime.now().isoformat(),
+            'prediction': prediction,
+            'input_data': input_data
+        })
+        
+        # 限制历史记录数量
+        if len(self.prediction_history[entity_id]) > 100:
+            self.prediction_history[entity_id].pop(0)
+            
+        return prediction
+    
+    def update_from_feedback(self, entity_id, actual_direction, learning_rate=None):
+        """
+        根据实际结果反馈更新量子态
+        
+        Args:
+            entity_id: 实体ID
+            actual_direction: 实际方向（正值表示上涨，负值表示下跌）
+            learning_rate: 学习率（如果为None则使用默认值）
+            
+        Returns:
+            更新后的量子态
+        """
+        if entity_id not in self.quantum_states:
+            logger.warning(f"实体{entity_id}没有量子态，无法更新")
+            return None
+            
+        # 使用指定的学习率或默认学习率
+        lr = learning_rate if learning_rate is not None else self.learning_rate
+        
+        # 获取最近的预测
+        if entity_id in self.prediction_history and self.prediction_history[entity_id]:
+            last_prediction = self.prediction_history[entity_id][-1]['prediction']
+            predicted_direction = last_prediction['predicted_direction']
+            
+            # 计算预测误差
+            error = actual_direction - predicted_direction
+            
+            # 如果误差太小，不更新
+            if abs(error) < 0.01:
+                return self.quantum_states[entity_id]
+                
+            # 更新量子态
+            quantum_state = self.quantum_states[entity_id]
+            
+            # 应用相位旋转来校正预测方向
+            # 方向误差越大，旋转角度越大
+            phase_rotation = error * lr * np.pi
+            
+            # 创建旋转矩阵
+            rotation_matrix = np.eye(self.dimensions, dtype=complex)
+            rotation_matrix[0, 0] = np.cos(phase_rotation) + 0j
+            rotation_matrix[0, 1] = -np.sin(phase_rotation) + 0j
+            rotation_matrix[1, 0] = np.sin(phase_rotation) + 0j
+            rotation_matrix[1, 1] = np.cos(phase_rotation) + 0j
+            
+            # 应用旋转
+            updated_state = np.dot(rotation_matrix, quantum_state)
+            
+            # 归一化
+            norm = np.sqrt(np.sum(np.abs(updated_state) ** 2))
+            if norm > 0:
+                updated_state = updated_state / norm
+                
+            # 更新存储的量子态
+            self.quantum_states[entity_id] = updated_state
+            
+            logger.debug(f"更新实体{entity_id}的量子态: 误差={error:.4f}, 学习率={lr:.4f}")
+            
+            return updated_state
+        else:
+            logger.warning(f"实体{entity_id}没有预测历史，无法更新")
+            return self.quantum_states[entity_id]
+    
+    def save_state(self, filepath):
+        """
+        保存引擎状态到文件
+        
+        Args:
+            filepath: 文件路径
+            
+        Returns:
+            是否成功
+        """
+        try:
+            # 将量子态转换为可序列化格式
+            serialized_states = {}
+            for entity_id, state in self.quantum_states.items():
+                serialized_states[entity_id] = {
+                    'real': state.real.tolist(),
+                    'imag': state.imag.tolist()
+                }
+                
+            # 保存状态
+            state_data = {
+                'dimensions': self.dimensions,
+                'learning_rate': self.learning_rate,
+                'entanglement_factor': self.entanglement_factor,
+                'quantum_states': serialized_states,
+                'entanglement_matrix': self.entanglement_matrix,
+                'timestamp': datetime.now().isoformat()
+            }
+            
+            # 确保目录存在
+            os.makedirs(os.path.dirname(filepath), exist_ok=True)
+            
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(state_data, f, ensure_ascii=False, indent=2)
+                
+            logger.info(f"量子引擎状态已保存到{filepath}")
+            return True
+        except Exception as e:
+            logger.error(f"保存量子引擎状态失败: {e}")
+            return False
+    
+    def load_state(self, filepath):
+        """
+        从文件加载引擎状态
+        
+        Args:
+            filepath: 文件路径
+            
+        Returns:
+            是否成功
+        """
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                state_data = json.load(f)
+                
+            # 加载基本参数
+            self.dimensions = state_data.get('dimensions', 8)
+            self.learning_rate = state_data.get('learning_rate', 0.01)
+            self.entanglement_factor = state_data.get('entanglement_factor', 0.3)
+            
+            # 加载量子态
+            self.quantum_states = {}
+            for entity_id, state_data in state_data.get('quantum_states', {}).items():
+                real_part = np.array(state_data['real'])
+                imag_part = np.array(state_data['imag'])
+                self.quantum_states[entity_id] = real_part + 1j * imag_part
+                
+            # 加载纠缠矩阵
+            self.entanglement_matrix = state_data.get('entanglement_matrix', {})
+            
+            logger.info(f"从{filepath}加载量子引擎状态成功")
+            return True
+        except Exception as e:
+            logger.error(f"加载量子引擎状态失败: {e}")
+            return False
+    
+    def analyze_entity_correlations(self, entity_id, top_n=5):
+        """
+        分析实体与其他实体的相关性
+        
+        Args:
+            entity_id: 实体ID
+            top_n: 返回最强相关的前N个实体
+            
+        Returns:
+            相关性列表
+        """
+        if entity_id not in self.quantum_states:
+            logger.warning(f"实体{entity_id}不存在")
+            return []
+            
+        target_state = self.quantum_states[entity_id]
+        correlations = []
+        
+        # 计算与所有其他实体的相关性
+        for other_id, other_state in self.quantum_states.items():
+            if other_id != entity_id:
+                # 计算量子态的内积（相关性度量）
+                correlation = np.abs(np.vdot(target_state, other_state))
+                correlations.append((other_id, correlation))
+                
+        # 按相关性降序排序
+        correlations.sort(key=lambda x: x[1], reverse=True)
+        
+        # 返回前N个
+        return correlations[:top_n]
+    
+    def get_quantum_stats(self):
+        """
+        获取量子引擎统计信息
+        
+        Returns:
+            统计信息字典
+        """
+        stats = {
+            'dimensions': self.dimensions,
+            'entity_count': len(self.quantum_states),
+            'entanglement_count': sum(len(entities) for entities in self.entanglement_matrix.values()),
+            'average_confidence': 0,
+            'system_coherence': 0
+        }
+        
+        # 计算平均置信度
+        confidences = []
+        for entity_id in self.quantum_states:
+            if entity_id in self.prediction_history and self.prediction_history[entity_id]:
+                confidences.append(self.prediction_history[entity_id][-1]['prediction']['confidence'])
+                
+        if confidences:
+            stats['average_confidence'] = sum(confidences) / len(confidences)
+            
+        # 计算系统的整体量子相干性
+        coherence_sum = 0
+        count = 0
+        for entity_id, state in self.quantum_states.items():
+            for other_id, other_state in self.quantum_states.items():
+                if entity_id != other_id:
+                    coherence_sum += np.abs(np.vdot(state, other_state))
+                    count += 1
+                    
+        if count > 0:
+            stats['system_coherence'] = coherence_sum / count
+            
+        return stats 

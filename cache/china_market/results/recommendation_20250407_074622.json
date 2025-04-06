@@ -1,0 +1,54 @@
+{
+  "recommendations": [
+    {
+      "stock": "600519",
+      "name": "",
+      "sector": "未知",
+      "action": "观望",
+      "current_price": 76.3324637346356,
+      "limit_price": null,
+      "risk_level": "中等风险"
+    },
+    {
+      "stock": "000858",
+      "name": "",
+      "sector": "未知",
+      "action": "观望",
+      "current_price": 63.79286495154213,
+      "limit_price": null,
+      "risk_level": "中等风险"
+    },
+    {
+      "stock": "601318",
+      "name": "",
+      "sector": "未知",
+      "action": "观望",
+      "current_price": 18.796810225208777,
+      "limit_price": null,
+      "risk_level": "中等风险"
+    },
+    {
+      "stock": "600036",
+      "name": "上证股票36",
+      "sector": "汽车",
+      "action": "观望",
+      "current_price": 60.36274743372524,
+      "limit_price": null,
+      "risk_level": "中等风险"
+    },
+    {
+      "stock": "000333",
+      "name": "",
+      "sector": "未知",
+      "action": "观望",
+      "current_price": 47.99151548582916,
+      "limit_price": null,
+      "risk_level": "中等风险"
+    }
+  ],
+  "northbound_favored": [],
+  "next_hot_sectors": [],
+  "market_risk": 0.5303867296468677,
+  "risk_level": "中等风险",
+  "timestamp": "2025-04-07 07:46:22"
+}

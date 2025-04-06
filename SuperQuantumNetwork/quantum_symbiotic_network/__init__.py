@@ -16,11 +16,10 @@ import os
 import sys
 import logging
 from pathlib import Path
-from quantum_symbiotic_network.network import QuantumSymbioticNetwork
 
 # 设置系统路径
 BASE_DIR = Path(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, str(BASE_DIR.parent))
+sys.path.insert(0, str(BASE_DIR.parent.parent))
 
 # 设置版本
 __version__ = "0.2.0"
@@ -32,12 +31,8 @@ logger = logging.getLogger("QuantumSymbioticNetwork")
 logger.info(f"量子共生网络 v{__version__} 已初始化")
 logger.info("初始化量子共生网络系统...")
 
-# 导入核心组件
-from quantum_symbiotic_network.core import (
-    FractalIntelligenceNetwork, 
-    QuantumProbabilityFramework,
-    SelfEvolvingNetwork
-)
+# 导入会在其他模块导入后进行，避免循环导入
+# from .network import QuantumSymbioticNetwork
 
 # 配置日志
 def setup_logging(level=logging.INFO, log_file=None):

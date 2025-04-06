@@ -1,0 +1,26 @@
+{
+  "date": "2025-04-07",
+  "time": "07:33:37",
+  "sh_index": {
+    "close": 2952.846680773503,
+    "change_pct": NaN
+  },
+  "sz_index": {
+    "close": 9852.606050085871,
+    "change_pct": NaN
+  },
+  "cyb_index": {
+    "close": 2023.8965552806208,
+    "change_pct": NaN
+  },
+  "market_stats": {
+    "up_count": 3200,
+    "down_count": 800,
+    "limit_up_count": 200,
+    "limit_down_count": 79,
+    "total_volume": 344127567843.77405,
+    "total_amount": 344127567843.77405
+  },
+  "avg_volume": 500000000000.0,
+  "north_bound_flow": -416427396.25703186
+}
