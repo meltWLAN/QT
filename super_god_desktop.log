@@ -1,0 +1,110 @@
+2025-04-07 10:03:17,927 - QuantumSymbioticNetwork - INFO - 量子共生网络 v0.2.0 已初始化
+2025-04-07 10:03:17,927 - QuantumSymbioticNetwork - INFO - 初始化量子共生网络系统...
+2025-04-07 10:03:18,638 - market_controllers - WARNING - 无法导入量子AI模块，将使用基础分析
+2025-04-07 10:03:18,638 - market_controllers - WARNING - 无法导入市场数据源模块，将使用本地数据
+2025-04-07 10:03:18,667 - market_controllers - INFO - 交易控制器初始化成功
+2025-04-07 10:03:18,668 - quantum_symbiotic_network.core.quantum_entanglement_engine - INFO - 量子纠缠预测引擎初始化完成: 维度=8, 纠缠因子=0.3
+2025-04-07 10:03:18,668 - SuperGodSystem - INFO - 成功导入所有模块
+2025-04-07 10:03:20,198 - SuperGodSystem - INFO - 超神系统启动完成
+2025-04-07 10:03:22,270 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 10:03:22,271 - market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 10:03:22,274 - market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 10:03:22,274 - market_controllers - INFO - 板块数据更新成功
+2025-04-07 10:03:22,277 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 10:03:22,279 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 10:03:45,885 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 10:03:45,886 - market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 10:03:45,886 - market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 10:03:45,886 - market_controllers - INFO - 板块数据更新成功
+2025-04-07 10:03:45,887 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 10:03:45,887 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 10:03:47,403 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 10:03:47,403 - market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 10:03:47,403 - market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 10:03:47,403 - market_controllers - INFO - 板块数据更新成功
+2025-04-07 10:03:47,404 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 10:03:47,404 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 10:03:47,600 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 10:03:47,601 - market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 10:03:47,601 - market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 10:03:47,601 - market_controllers - INFO - 板块数据更新成功
+2025-04-07 10:03:47,602 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 10:03:47,602 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 10:03:47,788 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 10:03:47,788 - market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 10:03:47,788 - market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 10:03:47,788 - market_controllers - INFO - 板块数据更新成功
+2025-04-07 10:03:47,789 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 10:03:47,789 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 10:03:48,097 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 10:03:48,097 - market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 10:03:48,098 - market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 10:03:48,098 - market_controllers - INFO - 板块数据更新成功
+2025-04-07 10:03:48,099 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 10:03:48,099 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 10:03:48,273 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 10:03:48,274 - market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 10:03:48,274 - market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 10:03:48,274 - market_controllers - INFO - 板块数据更新成功
+2025-04-07 10:03:48,275 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 10:03:48,275 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 10:03:48,450 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 10:03:48,450 - market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 10:03:48,450 - market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 10:03:48,450 - market_controllers - INFO - 板块数据更新成功
+2025-04-07 10:03:48,451 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 10:03:48,451 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 10:03:48,659 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 10:03:48,660 - market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 10:03:48,660 - market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 10:03:48,660 - market_controllers - INFO - 板块数据更新成功
+2025-04-07 10:03:48,661 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 10:03:48,661 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 10:03:49,843 - market_controllers - INFO - 开始市场趋势预测...
+2025-04-07 10:03:49,844 - market_controllers - INFO - 预测结果保存到: /Users/mac/超神系统/market_data/prediction_20250407_100349.json
+2025-04-07 10:03:49,844 - market_controllers - INFO - 市场趋势预测完成
+2025-04-07 10:03:49,844 - market_controllers - INFO - 生成投资组合建议...
+2025-04-07 10:03:49,848 - market_controllers - INFO - 投资组合建议生成完成
+2025-04-07 10:08:26,233 - QuantumSymbioticNetwork - INFO - 量子共生网络 v0.2.0 已初始化
+2025-04-07 10:08:26,233 - QuantumSymbioticNetwork - INFO - 初始化量子共生网络系统...
+2025-04-07 10:08:27,173 - market_controllers - WARNING - 无法导入量子AI模块，将使用基础分析
+2025-04-07 10:08:27,173 - market_controllers - WARNING - 无法导入市场数据源模块，将使用本地数据
+2025-04-07 10:08:27,192 - market_controllers - INFO - 交易控制器初始化成功
+2025-04-07 10:08:27,192 - quantum_symbiotic_network.core.quantum_entanglement_engine - INFO - 量子纠缠预测引擎初始化完成: 维度=8, 纠缠因子=0.3
+2025-04-07 10:08:27,192 - SuperGodSystem - INFO - 成功导入所有模块
+2025-04-07 10:08:28,848 - SuperGodSystem - INFO - 超神系统启动完成
+2025-04-07 10:08:30,966 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 10:08:30,971 - market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 10:08:30,971 - market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 10:08:30,972 - market_controllers - INFO - 板块数据更新成功
+2025-04-07 10:08:30,984 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 10:08:30,985 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 12:17:02,794 - QuantumSymbioticNetwork - INFO - 量子共生网络 v0.2.0 已初始化
+2025-04-07 12:17:02,794 - QuantumSymbioticNetwork - INFO - 初始化量子共生网络系统...
+2025-04-07 12:17:03,291 - market_controllers - WARNING - 无法导入量子AI模块，将使用基础分析
+2025-04-07 12:17:03,291 - market_controllers - WARNING - 无法导入市场数据源模块，将使用本地数据
+2025-04-07 12:17:05,197 - SuperGodSystem - INFO - 成功导入所有模块
+2025-04-07 12:17:05,197 - market_controllers - INFO - 交易控制器初始化成功
+2025-04-07 12:17:05,197 - quantum_symbiotic_network.core.quantum_entanglement_engine - INFO - 使用加密级量子随机源
+2025-04-07 12:17:05,197 - quantum_symbiotic_network.core.quantum_entanglement_engine - INFO - 量子纠缠预测引擎初始化完成: 维度=8, 纠缠因子=0.3
+2025-04-07 12:17:05,198 - SuperGodSystem - INFO - 初始化基础后台服务完成
+2025-04-07 12:17:06,258 - SuperGodSystem - INFO - 超神系统启动完成，用时: 1.14秒
+2025-04-07 12:17:06,883 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 12:17:06,897 - market_controllers - INFO - 市场指数数据获取成功
+2025-04-07 12:17:06,898 - market_controllers - INFO - 北向资金数据获取成功
+2025-04-07 12:17:06,962 - market_controllers - INFO - 板块数据获取成功
+2025-04-07 12:17:06,964 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 12:17:06,966 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 12:19:55,487 - china_market_view - INFO - 已启用自动刷新，间隔: 5分钟
+2025-04-07 12:19:56,864 - market_controllers - INFO - 开始市场趋势预测...
+2025-04-07 12:19:56,865 - market_controllers - INFO - 使用基本分析完成市场预测
+2025-04-07 12:19:56,866 - market_controllers - INFO - 预测结果保存到: /Users/mac/超神系统/market_data/prediction_20250407_121956.json
+2025-04-07 12:19:56,866 - market_controllers - INFO - 市场趋势预测完成
+2025-04-07 12:19:56,866 - market_controllers - INFO - 生成投资组合建议...
+2025-04-07 12:19:56,870 - market_controllers - INFO - 投资组合建议生成完成
+2025-04-07 12:20:55,459 - market_controllers - INFO - 开始更新市场数据...
+2025-04-07 12:20:55,460 - market_controllers - INFO - 市场指数数据获取成功
+2025-04-07 12:20:55,460 - market_controllers - INFO - 使用缓存的北向资金数据
+2025-04-07 12:20:55,460 - market_controllers - INFO - 使用缓存的板块数据
+2025-04-07 12:20:55,461 - market_controllers - INFO - 市场数据更新完成
+2025-04-07 12:20:55,462 - market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json

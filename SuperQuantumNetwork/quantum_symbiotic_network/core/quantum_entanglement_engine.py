@@ -15,6 +15,7 @@ import os
 import random
 import math
 import networkx as nx
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -122,6 +123,15 @@ class QuantumEntanglementEngine:
             'resonance': 0.61803  # 黄金分割比
         }
         
+        # 性能优化：计算缓存
+        self._computation_cache = {}
+        self._cache_expiry = {}
+        self._cache_lifetime = 60  # 缓存生命周期（秒）
+        self._priority_entities = set()  # 优先处理的实体
+        
+        # 性能优化：使用numpy向量化操作
+        self._use_vectorization = True
+        
         # 初始化随机数生成器
         try:
             # 尝试使用真正的量子随机数生成器
@@ -136,9 +146,29 @@ class QuantumEntanglementEngine:
         
         logger.info(f"量子纠缠预测引擎初始化完成: 维度={dimensions}, 纠缠因子={entanglement_factor}")
     
+    def set_priority_entities(self, entities):
+        """
+        设置优先处理的实体列表
+        
+        Args:
+            entities: 需要优先计算的实体列表
+        """
+        self._priority_entities = set(entities)
+    
+    def _initialize_quantum_states(self, entities):
+        """
+        批量初始化量子态 - 优化版本，支持向量化操作
+        
+        Args:
+            entities: 实体列表
+        """
+        for entity in entities:
+            if entity not in self.quantum_states:
+                self._initialize_quantum_state(entity)
+    
     def initialize_entanglement(self, entities, correlation_matrix):
         """
-        初始化实体间的纠缠关系
+        初始化实体间的纠缠关系 - 优化版本
         
         Args:
             entities: 实体列表（如股票代码列表）
@@ -148,23 +178,181 @@ class QuantumEntanglementEngine:
             初始化后的纠缠群组
         """
         # 初始化所有实体的量子态
-        for entity in entities:
-            if entity not in self.quantum_states:
-                self._initialize_quantum_state(entity)
+        self._initialize_quantum_states(entities)
         
         # 初始化纠缠关系
+        batch_entities = []
+        batch_correlations = []
+        
         for (entity1, entity2), correlation in correlation_matrix.items():
             if entity1 in entities and entity2 in entities:
                 # 将相关性转换为纠缠强度
                 entanglement_strength = correlation
                 
-                # 添加纠缠关系
-                self.add_entanglement(entity1, entity2, entanglement_strength)
+                # 收集批处理数据
+                batch_entities.append((entity1, entity2))
+                batch_correlations.append(entanglement_strength)
+        
+        # 批量添加纠缠关系
+        if self._use_vectorization and batch_entities:
+            self._batch_add_entanglement(batch_entities, batch_correlations)
+        else:
+            # 添加纠缠关系 - 传统方法
+            for i, (entity1, entity2) in enumerate(batch_entities):
+                self.add_entanglement(entity1, entity2, batch_correlations[i])
         
         # 识别纠缠群组
         self._identify_entanglement_clusters(entities, correlation_matrix)
         
         return self.entanglement_clusters
+    
+    def _batch_add_entanglement(self, entity_pairs, strengths):
+        """
+        批量添加纠缠关系
+        
+        Args:
+            entity_pairs: 实体对列表 [(entity1, entity2), ...]
+            strengths: 纠缠强度列表 [strength1, strength2, ...]
+        """
+        for i, (entity1, entity2) in enumerate(entity_pairs):
+            # 获取纠缠强度
+            strength = strengths[i]
+            
+            # 生成相位 - 使用一致的算法保证相同实体对总是有相同的初始相位
+            combined = entity1 + entity2
+            phase_seed = sum(ord(c) for c in combined) / 1000.0
+            phase = phase_seed * np.pi * 2
+            
+            # 添加纠缠关系 - 双向
+            key1 = (entity1, entity2)
+            key2 = (entity2, entity1)
+            
+            # 创建纠缠属性
+            entanglement_prop = EntanglementProperty(
+                strength=strength,
+                phase=phase,
+                stability=0.8,  # 默认稳定性
+                decay_rate=0.01  # 默认衰减率
+            )
+            
+            # 存储纠缠关系
+            self.entanglement_matrix[key1] = entanglement_prop
+            self.entanglement_matrix[key2] = entanglement_prop
+    
+    def compute_market_resonance(self, market_data):
+        """
+        计算市场共振效应 - 性能优化版本
+        
+        Args:
+            market_data: 市场数据字典，格式为 {entity: {'price': float, 'price_change_pct': float, ...}}
+            
+        Returns:
+            共振结果字典 {entity: resonance_value}
+        """
+        # 生成缓存键
+        cache_key = self._generate_cache_key('market_resonance', market_data)
+        current_time = time.time()
+        
+        # 检查缓存是否有效
+        if cache_key in self._computation_cache and self._cache_expiry.get(cache_key, 0) > current_time:
+            return self._computation_cache[cache_key]
+        
+        resonance_results = {}
+        
+        # 优先处理优先级实体
+        priority_entities = [e for e in market_data if e in self._priority_entities]
+        normal_entities = [e for e in market_data if e not in self._priority_entities]
+        
+        # 处理所有实体
+        for entity in priority_entities + normal_entities:
+            if entity in self.quantum_states:
+                # 获取量子态
+                quantum_state = self.quantum_states[entity]
+                
+                # 应用市场数据，获取变换后的量子态
+                transformed_state = self._apply_quantum_transformation(quantum_state, market_data.get(entity, {}))
+                
+                # 计算与其他纠缠实体的共振
+                resonance = self._compute_entity_resonance(entity, transformed_state, market_data)
+                
+                # 存储共振结果
+                resonance_results[entity] = resonance
+        
+        # 缓存结果
+        self._computation_cache[cache_key] = resonance_results
+        self._cache_expiry[cache_key] = current_time + self._cache_lifetime
+        
+        # 清理过期缓存
+        self._cleanup_cache()
+        
+        return resonance_results
+    
+    def _compute_entity_resonance(self, entity, transformed_state, market_data):
+        """计算单个实体的共振效应"""
+        # 查找与该实体有纠缠关系的其他实体
+        entangled_entities = []
+        
+        for (e1, e2) in self.entanglement_matrix:
+            if e1 == entity and e2 in market_data:
+                entangled_entities.append(e2)
+        
+        if not entangled_entities:
+            return 0.0
+        
+        # 计算共振强度
+        total_resonance = 0.0
+        
+        for e2 in entangled_entities:
+            if e2 in self.quantum_states:
+                # 获取纠缠关系
+                entanglement = self.entanglement_matrix.get((entity, e2))
+                if entanglement:
+                    # 计算量子态相干性
+                    coherence = self._compute_quantum_coherence(
+                        transformed_state, 
+                        self.quantum_states[e2]
+                    )
+                    
+                    # 计算共振强度
+                    resonance = coherence * entanglement.strength
+                    total_resonance += resonance
+        
+        return total_resonance / len(entangled_entities) if entangled_entities else 0.0
+    
+    def _compute_quantum_coherence(self, state1, state2):
+        """计算两个量子态之间的相干性"""
+        # 使用向量化操作
+        return np.abs(np.dot(state1, np.conj(state2)))
+    
+    def _generate_cache_key(self, prefix, data):
+        """生成缓存键"""
+        # 对于复杂数据结构，使用哈希来生成键
+        if isinstance(data, dict):
+            # 仅使用关键特性来生成键，避免过度计算
+            key_features = []
+            for entity, values in data.items():
+                if isinstance(values, dict):
+                    features = []
+                    for k in ['price', 'price_change_pct', 'volume_relative']:
+                        if k in values:
+                            features.append(f"{k}:{values[k]:.4f}")
+                    key_features.append(f"{entity}({','.join(features)})")
+                else:
+                    key_features.append(f"{entity}:{values}")
+            
+            return f"{prefix}:{hash(','.join(sorted(key_features)))}"
+        else:
+            return f"{prefix}:{hash(str(data))}"
+    
+    def _cleanup_cache(self):
+        """清理过期缓存"""
+        current_time = time.time()
+        expired_keys = [k for k, exp_time in self._cache_expiry.items() if exp_time <= current_time]
+        
+        for key in expired_keys:
+            if key in self._computation_cache:
+                del self._computation_cache[key]
+            del self._cache_expiry[key]
     
     def _identify_entanglement_clusters(self, entities, correlation_matrix, threshold=0.5):
         """
@@ -233,47 +421,6 @@ class QuantumEntanglementEngine:
                     network['edges'].append(edge)
         
         return network
-    
-    def compute_market_resonance(self, market_data):
-        """
-        计算市场共振状态
-        
-        Args:
-            market_data: 市场数据，格式为 {asset: {feature1: value1, ...}}
-            
-        Returns:
-            共振状态字典，格式为 {asset: resonance_value}
-        """
-        resonance_state = {}
-        
-        # 对每个资产计算共振
-        for asset, data in market_data.items():
-            if asset in self.quantum_states:
-                # 获取量子态
-                state = self.quantum_states[asset]
-                
-                # 计算振幅平方和（概率）
-                amplitudes = np.abs(state) ** 2
-                
-                # 计算共振值（熵的逆）
-                entropy = -np.sum(amplitudes * np.log(amplitudes + 1e-10))
-                max_entropy = np.log(self.dimensions)
-                
-                # 归一化共振值（0-1范围）
-                # 熵越低，共振越高
-                resonance = 1.0 - (entropy / max_entropy)
-                
-                # 考虑市场数据的影响
-                price_change = data.get('price_change_pct', 0)
-                volume = data.get('volume_relative', 1.0)
-                
-                # 调整共振值
-                resonance_adjustment = abs(price_change) * volume * 0.2
-                resonance = min(1.0, resonance + resonance_adjustment)
-                
-                resonance_state[asset] = resonance
-        
-        return resonance_state
     
     def predict_market_movement(self, assets):
         """

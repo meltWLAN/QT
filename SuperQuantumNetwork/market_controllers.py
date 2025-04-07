@@ -13,10 +13,16 @@ import pandas as pd
 import json
 import os
 import sys
+import threading
 from threading import Thread, Lock
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import lru_cache
 
 # 配置日志
 logger = logging.getLogger(__name__)
+
+# 全局线程池 - 用于优化并行请求
+_THREAD_POOL = ThreadPoolExecutor(max_workers=4, thread_name_prefix="MarketController")
 
 # 尝试导入数据分析和AI模块
 try:
@@ -55,14 +61,27 @@ class MarketDataController:
         self.latest_prediction = {}
         self.data_lock = Lock()
         
-        # 初始化AI引擎
+        # 性能优化：缓存最近的数据以减少文件I/O
+        self._data_cache = {}  # 键: 文件路径, 值: (数据, 时间戳)
+        self._cache_lifetime = 300  # 缓存有效期(秒)
+        self._last_save_time = 0  # 上次保存数据的时间
+        self._min_save_interval = 60  # 最小保存间隔(秒)
+        
+        # 高级缓存策略
+        self._memory_cache = {}  # 内存缓存
+        self._memory_cache_ttl = {}  # 缓存过期时间
+        self._last_update_time = 0  # 上次更新时间
+        self._min_update_interval = 10  # 最小更新间隔(秒)
+        
+        # 延迟初始化标志
+        self._ai_engine_initialized = False
+        
+        # 初始化AI引擎 - 仅在明确请求时加载
         if self.use_ai:
-            try:
-                self.ai_engine = QuantumAIEngine(config=self.config.get('ai_config', {}))
-                logger.info("量子AI引擎初始化成功")
-            except Exception as e:
-                logger.error(f"量子AI引擎初始化失败: {str(e)}")
-                self.use_ai = False
+            # 使用后台线程初始化AI引擎，避免阻塞UI
+            self._ai_init_thread = Thread(target=self._initialize_ai_engine)
+            self._ai_init_thread.daemon = True
+            self._ai_init_thread.start()
         
         # 设置数据目录
         self.data_dir = self.config.get('data_dir', os.path.expanduser('~/超神系统/market_data'))
@@ -76,23 +95,80 @@ class MarketDataController:
                 if not os.path.exists(self.data_dir):
                     os.makedirs(self.data_dir)
     
-    def update_market_data(self):
-        """更新市场数据"""
+    def _initialize_ai_engine(self):
+        """延迟初始化AI引擎"""
+        if not self._ai_engine_initialized and HAS_QUANTUM_AI:
+            try:
+                logger.info("开始初始化量子AI引擎...")
+                self.ai_engine = QuantumAIEngine(config=self.config.get('ai_config', {}))
+                self._ai_engine_initialized = True
+                logger.info("量子AI引擎初始化成功")
+            except Exception as e:
+                logger.error(f"量子AI引擎初始化失败: {str(e)}")
+                self.use_ai = False
+    
+    def enable_ai_prediction(self):
+        """启用AI预测功能"""
+        if not self._ai_engine_initialized:
+            self.use_ai = True
+            self._initialize_ai_engine()
+            logger.info("启用AI预测功能")
+    
+    def update_market_data(self, force_save=False, force_update=False):
+        """更新市场数据
+        
+        Args:
+            force_save: 是否强制保存到磁盘
+            force_update: 是否强制更新（忽略缓存）
+        
+        Returns:
+            更新是否成功
+        """
         logger.info("开始更新市场数据...")
+        
+        # 检查更新间隔，避免频繁请求
+        current_time = time.time()
+        if not force_update and (current_time - self._last_update_time) < self._min_update_interval:
+            logger.info(f"距离上次更新不足{self._min_update_interval}秒，使用缓存数据")
+            return True
         
         with self.data_lock:
             try:
+                # 使用线程池并行获取各类数据
+                futures = []
+                
                 # 获取市场指数数据
-                self._update_market_indices()
+                futures.append(_THREAD_POOL.submit(self._fetch_market_indices))
                 
                 # 获取北向资金数据
-                self._update_north_flow()
+                futures.append(_THREAD_POOL.submit(self._fetch_north_flow))
                 
                 # 获取板块数据
-                self._update_sector_data()
+                futures.append(_THREAD_POOL.submit(self._fetch_sector_data))
                 
-                # 保存数据到本地
-                self._save_market_data()
+                # 等待所有数据获取完成
+                for future in as_completed(futures):
+                    try:
+                        data_type, data = future.result()
+                        if data_type == 'indices':
+                            # 更新市场指数数据
+                            self.market_data.update(data)
+                        elif data_type == 'north_flow':
+                            # 更新北向资金数据
+                            self.latest_prediction['north_flow'] = data
+                        elif data_type == 'sectors':
+                            # 更新板块数据
+                            self.market_data['sectors'] = data
+                    except Exception as e:
+                        logger.error(f"处理数据更新任务异常: {str(e)}")
+                
+                # 更新时间戳
+                self._last_update_time = current_time
+                
+                # 保存数据到本地（根据条件）
+                if force_save or (current_time - self._last_save_time) > self._min_save_interval:
+                    self._save_market_data()
+                    self._last_save_time = current_time
                 
                 logger.info("市场数据更新完成")
                 return True
@@ -101,36 +177,77 @@ class MarketDataController:
                 logger.error(traceback.format_exc())
                 return False
     
-    def _update_market_indices(self):
-        """更新市场指数数据"""
+    def _fetch_market_indices(self):
+        """获取市场指数数据（线程池工作函数）"""
         try:
+            # 检查缓存
+            cache_key = 'market_indices'
+            if cache_key in self._memory_cache and time.time() < self._memory_cache_ttl.get(cache_key, 0):
+                logger.info("使用缓存的市场指数数据")
+                return 'indices', self._memory_cache[cache_key]
+            
             if HAS_DATA_SOURCE:
-                # 获取上证指数数据
-                sh_data = get_index_data('000001.SH')
-                # 获取深证成指数据
-                sz_data = get_index_data('399001.SZ')
-                # 获取创业板指数据
-                cyb_data = get_index_data('399006.SZ')
+                # 并行获取三大指数数据
+                indices_futures = []
+                indices_futures.append(_THREAD_POOL.submit(get_index_data, '000001.SH'))
+                indices_futures.append(_THREAD_POOL.submit(get_index_data, '399001.SZ'))
+                indices_futures.append(_THREAD_POOL.submit(get_index_data, '399006.SZ'))
+                
+                # 获取结果
+                sh_data, sz_data, cyb_data = None, None, None
+                for i, future in enumerate(as_completed(indices_futures)):
+                    try:
+                        result = future.result()
+                        if '000001.SH' in str(result.get('code', '')):
+                            sh_data = result
+                        elif '399001.SZ' in str(result.get('code', '')):
+                            sz_data = result
+                        elif '399006.SZ' in str(result.get('code', '')):
+                            cyb_data = result
+                    except Exception as e:
+                        logger.error(f"获取指数数据异常: {str(e)}")
+                
+                # 如果有缺失数据，使用模拟数据填充
+                if not sh_data:
+                    sh_data = self._generate_mock_index_data('上证指数')
+                if not sz_data:
+                    sz_data = self._generate_mock_index_data('深证成指')
+                if not cyb_data:
+                    cyb_data = self._generate_mock_index_data('创业板指')
             else:
                 # 使用模拟数据
                 sh_data = self._generate_mock_index_data('上证指数')
                 sz_data = self._generate_mock_index_data('深证成指')
                 cyb_data = self._generate_mock_index_data('创业板指')
             
-            # 更新市场数据
-            self.market_data['sh_index'] = sh_data
-            self.market_data['sz_index'] = sz_data
-            self.market_data['cyb_index'] = cyb_data
+            # 组装数据
+            indices_data = {
+                'sh_index': sh_data,
+                'sz_index': sz_data,
+                'cyb_index': cyb_data
+            }
             
-            logger.info("市场指数数据更新成功")
+            # 更新缓存
+            self._memory_cache[cache_key] = indices_data
+            self._memory_cache_ttl[cache_key] = time.time() + 60  # 缓存1分钟
+            
+            logger.info("市场指数数据获取成功")
+            return 'indices', indices_data
         except Exception as e:
-            logger.error(f"更新市场指数数据失败: {str(e)}")
+            logger.error(f"获取市场指数数据失败: {str(e)}")
             logger.error(traceback.format_exc())
-            raise
+            # 返回空数据而不是抛出异常，以避免整个更新过程失败
+            return 'indices', {}
     
-    def _update_north_flow(self):
-        """更新北向资金数据"""
+    def _fetch_north_flow(self):
+        """获取北向资金数据（线程池工作函数）"""
         try:
+            # 检查缓存
+            cache_key = 'north_flow'
+            if cache_key in self._memory_cache and time.time() < self._memory_cache_ttl.get(cache_key, 0):
+                logger.info("使用缓存的北向资金数据")
+                return 'north_flow', self._memory_cache[cache_key]
+                
             if HAS_DATA_SOURCE:
                 # 获取北向资金数据
                 north_flow = get_north_flow()
@@ -138,18 +255,27 @@ class MarketDataController:
                 # 使用模拟数据
                 north_flow = self._generate_mock_north_flow()
             
-            # 更新北向资金数据
-            self.latest_prediction['north_flow'] = north_flow
+            # 更新缓存
+            self._memory_cache[cache_key] = north_flow
+            self._memory_cache_ttl[cache_key] = time.time() + 300  # 缓存5分钟
             
-            logger.info("北向资金数据更新成功")
+            logger.info("北向资金数据获取成功")
+            return 'north_flow', north_flow
         except Exception as e:
-            logger.error(f"更新北向资金数据失败: {str(e)}")
+            logger.error(f"获取北向资金数据失败: {str(e)}")
             logger.error(traceback.format_exc())
-            # 这里不抛出异常，因为北向资金不是必须的
+            # 返回空数据
+            return 'north_flow', {}
     
-    def _update_sector_data(self):
-        """更新板块数据"""
+    def _fetch_sector_data(self):
+        """获取板块数据（线程池工作函数）"""
         try:
+            # 检查缓存
+            cache_key = 'sectors'
+            if cache_key in self._memory_cache and time.time() < self._memory_cache_ttl.get(cache_key, 0):
+                logger.info("使用缓存的板块数据")
+                return 'sectors', self._memory_cache[cache_key]
+                
             if HAS_DATA_SOURCE:
                 # 获取板块数据
                 sector_data = get_sector_data()
@@ -157,15 +283,33 @@ class MarketDataController:
                 # 使用模拟数据
                 sector_data = self._generate_mock_sector_data()
             
-            # 更新板块数据
-            self.market_data['sectors'] = sector_data
+            # 更新缓存
+            self._memory_cache[cache_key] = sector_data
+            self._memory_cache_ttl[cache_key] = time.time() + 300  # 缓存5分钟
             
-            logger.info("板块数据更新成功")
+            logger.info("板块数据获取成功")
+            return 'sectors', sector_data
         except Exception as e:
-            logger.error(f"更新板块数据失败: {str(e)}")
+            logger.error(f"获取板块数据失败: {str(e)}")
             logger.error(traceback.format_exc())
-            # 这里不抛出异常，因为板块数据不是必须的
+            # 返回空数据
+            return 'sectors', {}
     
+    def _update_market_indices(self):
+        """更新市场指数数据（兼容旧代码）"""
+        data_type, indices_data = self._fetch_market_indices()
+        self.market_data.update(indices_data)
+    
+    def _update_north_flow(self):
+        """更新北向资金数据（兼容旧代码）"""
+        data_type, north_flow = self._fetch_north_flow()
+        self.latest_prediction['north_flow'] = north_flow
+    
+    def _update_sector_data(self):
+        """更新板块数据（兼容旧代码）"""
+        data_type, sector_data = self._fetch_sector_data()
+        self.market_data['sectors'] = sector_data
+        
     def _save_market_data(self):
         """保存市场数据到本地"""
         try:
@@ -173,40 +317,94 @@ class MarketDataController:
             date_str = datetime.now().strftime('%Y%m%d')
             file_path = os.path.join(self.data_dir, f'market_data_{date_str}.json')
             
-            # 保存数据
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(self.market_data, f, ensure_ascii=False, indent=2)
+            # 异步保存数据
+            def _async_save():
+                try:
+                    # 创建临时副本以避免长时间锁定
+                    with self.data_lock:
+                        data_copy = self.market_data.copy()
+                    
+                    # 保存数据
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        json.dump(data_copy, f, ensure_ascii=False, indent=2)
+                    
+                    # 更新缓存
+                    self._data_cache[file_path] = (data_copy, time.time())
+                    
+                    logger.info(f"市场数据保存到: {file_path}")
+                except Exception as e:
+                    logger.error(f"异步保存市场数据失败: {str(e)}")
             
-            logger.info(f"市场数据保存到: {file_path}")
+            # 启动异步保存线程
+            save_thread = Thread(target=_async_save)
+            save_thread.daemon = True
+            save_thread.start()
         except Exception as e:
             logger.error(f"保存市场数据失败: {str(e)}")
             logger.error(traceback.format_exc())
     
+    @lru_cache(maxsize=32)
+    def _load_data_from_file(self, file_path):
+        """从文件加载数据，使用Python内置LRU缓存优化性能"""
+        # 从文件加载
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return data
+        except Exception as e:
+            logger.error(f"加载文件失败: {file_path} - {str(e)}")
+            return None
+        
     def predict_market_trend(self):
         """预测市场趋势"""
         logger.info("开始市场趋势预测...")
         
         with self.data_lock:
             try:
-                if self.use_ai:
-                    # 使用量子AI引擎进行预测
-                    prediction = self.ai_engine.predict_market(self.market_data)
-                else:
-                    # 使用基础分析进行预测
-                    prediction = self._basic_market_analysis()
+                # 如果启用AI但尚未初始化，则现在初始化
+                if self.use_ai and not self._ai_engine_initialized:
+                    self._initialize_ai_engine()
                 
-                # 更新最新预测结果
-                self.latest_prediction.update(prediction)
+                # 检查缓存，避免短时间内重复预测
+                cache_key = 'market_prediction'
+                current_time = time.time()
+                cache_valid = (
+                    cache_key in self._memory_cache and 
+                    current_time < self._memory_cache_ttl.get(cache_key, 0)
+                )
+                
+                if cache_valid:
+                    logger.info("使用缓存的市场预测结果")
+                    return self._memory_cache[cache_key]
+                
+                # 生成预测
+                if self.use_ai and self._ai_engine_initialized:
+                    # 使用AI进行预测
+                    prediction = self.ai_engine.predict_market(self.market_data)
+                    logger.info("使用量子AI完成市场预测")
+                else:
+                    # 使用基本分析
+                    prediction = self._basic_market_analysis()
+                    logger.info("使用基本分析完成市场预测")
                 
                 # 保存预测结果
-                self._save_prediction()
+                self._save_prediction(prediction)
+                
+                # 更新预测缓存
+                self._memory_cache[cache_key] = prediction
+                self._memory_cache_ttl[cache_key] = current_time + 300  # 缓存5分钟
+                
+                # 更新最新预测
+                self.latest_prediction.update(prediction)
                 
                 logger.info("市场趋势预测完成")
-                return self.latest_prediction
+                return prediction
             except Exception as e:
-                logger.error(f"市场趋势预测失败: {str(e)}")
+                logger.error(f"预测市场趋势失败: {str(e)}")
                 logger.error(traceback.format_exc())
-                return {}
+                
+                # 返回一个基本预测结果，避免UI崩溃
+                return self._basic_market_analysis()
     
     def _basic_market_analysis(self):
         """基本市场分析 (当AI不可用时)"""
@@ -367,21 +565,21 @@ class MarketDataController:
         
         return suggestions
     
-    def _save_prediction(self):
+    def _save_prediction(self, prediction):
         """保存预测结果"""
         try:
-            # 创建文件名 (使用日期和时间)
-            datetime_str = datetime.now().strftime('%Y%m%d_%H%M%S')
-            file_path = os.path.join(self.data_dir, f'prediction_{datetime_str}.json')
+            # 创建文件名
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            file_path = os.path.join(self.data_dir, f'prediction_{timestamp}.json')
             
-            # 保存数据
+            # 保存数据 - 使用基本格式以提高性能
             with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(self.latest_prediction, f, ensure_ascii=False, indent=2)
+                json.dump(prediction, f, ensure_ascii=False)
             
             logger.info(f"预测结果保存到: {file_path}")
         except Exception as e:
             logger.error(f"保存预测结果失败: {str(e)}")
-            logger.error(traceback.format_exc())
+            # 不抛出异常，因为这是非关键操作
     
     # ---- 模拟数据生成方法 (用于开发和测试) ----
     

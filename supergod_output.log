@@ -1,0 +1,26 @@
+Traceback (most recent call last):
+  File "/Users/mac/Desktop/超神系统/SuperQuantumNetwork/quantum_view.py", line 138, in paintEvent
+    painter.drawText(x + 10, y + 10, f"|ψ{i}>")
+TypeError: arguments did not match any overloaded call:
+  drawText(self, p: Union[QPointF, QPoint], s: Optional[str]): argument 1 has unexpected type 'float'
+  drawText(self, rectangle: QRectF, flags: int, text: Optional[str]): argument 1 has unexpected type 'float'
+  drawText(self, rectangle: QRect, flags: int, text: Optional[str]): argument 1 has unexpected type 'float'
+  drawText(self, rectangle: QRectF, text: Optional[str], option: QTextOption = QTextOption()): argument 1 has unexpected type 'float'
+  drawText(self, p: QPoint, s: Optional[str]): argument 1 has unexpected type 'float'
+  drawText(self, x: int, y: int, width: int, height: int, flags: int, text: Optional[str]): argument 1 has unexpected type 'float'
+  drawText(self, x: int, y: int, s: Optional[str]): argument 1 has unexpected type 'float'
+QBackingStore::endPaint() called with active painter; did you forget to destroy it or call QPainter::end() on it?
+Traceback (most recent call last):
+  File "/Users/mac/Desktop/超神系统/SuperQuantumNetwork/quantum_view.py", line 138, in paintEvent
+    painter.drawText(x + 10, y + 10, f"|ψ{i}>")
+TypeError: arguments did not match any overloaded call:
+  drawText(self, p: Union[QPointF, QPoint], s: Optional[str]): argument 1 has unexpected type 'float'
+  drawText(self, rectangle: QRectF, flags: int, text: Optional[str]): argument 1 has unexpected type 'float'
+  drawText(self, rectangle: QRect, flags: int, text: Optional[str]): argument 1 has unexpected type 'float'
+  drawText(self, rectangle: QRectF, text: Optional[str], option: QTextOption = QTextOption()): argument 1 has unexpected type 'float'
+  drawText(self, p: QPoint, s: Optional[str]): argument 1 has unexpected type 'float'
+  drawText(self, x: int, y: int, width: int, height: int, flags: int, text: Optional[str]): argument 1 has unexpected type 'float'
+  drawText(self, x: int, y: int, s: Optional[str]): argument 1 has unexpected type 'float'
+QBackingStore::endPaint() called with active painter; did you forget to destroy it or call QPainter::end() on it?
+QPainter::begin: A paint device can only be painted by one painter at a time.
+QPainter::setCompositionMode: Painter not active
