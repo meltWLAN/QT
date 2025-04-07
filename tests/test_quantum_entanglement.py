@@ -30,9 +30,11 @@ def test_quantum_entanglement_engine():
     """测试量子纠缠引擎基本功能"""
     print_header("测试: 量子纠缠引擎基本功能")
     
-    # 初始化引擎 - 添加空配置参数
-    engine = QuantumEntanglementEngine(dimensions=8, depth=5, config={})
-    print(f"引擎初始化: 维度={engine.dimensions}, 深度={engine.depth}")
+    # 初始化引擎 - 修复参数问题
+    # 原始参数 engine = QuantumEntanglementEngine(dimensions=8, depth=5, config={})
+    # 修改为符合当前引擎接口的参数
+    engine = QuantumEntanglementEngine(dimensions=8, learning_rate=0.01, entanglement_factor=0.3)
+    print(f"引擎初始化: 维度={engine.dimensions}")
     
     # 初始化资产列表
     assets = ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "META", "BABA"]

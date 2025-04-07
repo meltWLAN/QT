@@ -14,8 +14,75 @@ import json
 import os
 import random
 import math
+import networkx as nx
 
 logger = logging.getLogger(__name__)
+
+class EntanglementProperty:
+    """
+    量子纠缠属性类 - 用于描述两个实体间的纠缠关系特性
+    """
+    
+    def __init__(self, strength=0.0, phase=0.0, stability=1.0, decay_rate=0.01):
+        """
+        初始化纠缠属性
+        
+        Args:
+            strength: 纠缠强度 (0.0-1.0)
+            phase: 纠缠相位 (0.0-2π)
+            stability: 纠缠稳定性 (0.0-1.0)
+            decay_rate: 纠缠衰减率
+        """
+        self.strength = min(max(0.0, strength), 1.0)  # 限制在0-1范围内
+        self.phase = phase % (2 * np.pi)  # 规范化到0-2π
+        self.stability = min(max(0.0, stability), 1.0)
+        self.decay_rate = max(0.0, decay_rate)
+        self.creation_time = datetime.now()
+    
+    def update_strength(self, delta_strength):
+        """更新纠缠强度"""
+        self.strength = min(max(0.0, self.strength + delta_strength), 1.0)
+        return self.strength
+    
+    def decay(self, time_elapsed=1.0):
+        """
+        随时间衰减纠缠强度
+        
+        Args:
+            time_elapsed: 经过的时间单位
+            
+        Returns:
+            衰减后的强度
+        """
+        decay_factor = np.exp(-self.decay_rate * time_elapsed * (1 - self.stability))
+        self.strength *= decay_factor
+        return self.strength
+    
+    def to_dict(self):
+        """转换为字典表示"""
+        return {
+            'strength': self.strength,
+            'phase': self.phase,
+            'stability': self.stability,
+            'decay_rate': self.decay_rate,
+            'creation_time': self.creation_time.isoformat()
+        }
+    
+    @classmethod
+    def from_dict(cls, data):
+        """从字典创建实例"""
+        instance = cls(
+            strength=data.get('strength', 0.0),
+            phase=data.get('phase', 0.0),
+            stability=data.get('stability', 1.0),
+            decay_rate=data.get('decay_rate', 0.01)
+        )
+        if 'creation_time' in data:
+            try:
+                instance.creation_time = datetime.fromisoformat(data['creation_time'])
+            except ValueError:
+                pass  # 使用默认创建时间
+        return instance
 
 class QuantumEntanglementEngine:
     """量子纠缠预测引擎"""
@@ -32,12 +99,16 @@ class QuantumEntanglementEngine:
         self.dimensions = dimensions
         self.learning_rate = learning_rate
         self.entanglement_factor = entanglement_factor
+        self.depth = 5  # 添加深度参数以兼容测试
         
         # 存储所有实体的量子态
         self.quantum_states = {}
         
         # 存储实体间的纠缠关系
         self.entanglement_matrix = {}
+        
+        # 纠缠群组
+        self.entanglement_clusters = []
         
         # 预测历史记录
         self.prediction_history = {}
@@ -46,6 +117,216 @@ class QuantumEntanglementEngine:
         np.random.seed(datetime.now().microsecond)
         
         logger.info(f"量子纠缠预测引擎初始化完成: 维度={dimensions}, 纠缠因子={entanglement_factor}")
+    
+    def initialize_entanglement(self, entities, correlation_matrix):
+        """
+        初始化实体间的纠缠关系
+        
+        Args:
+            entities: 实体列表（如股票代码列表）
+            correlation_matrix: 相关性矩阵，格式为 {(entity1, entity2): correlation}
+            
+        Returns:
+            初始化后的纠缠群组
+        """
+        # 初始化所有实体的量子态
+        for entity in entities:
+            if entity not in self.quantum_states:
+                self._initialize_quantum_state(entity)
+        
+        # 初始化纠缠关系
+        for (entity1, entity2), correlation in correlation_matrix.items():
+            if entity1 in entities and entity2 in entities:
+                # 将相关性转换为纠缠强度
+                entanglement_strength = correlation
+                
+                # 添加纠缠关系
+                self.add_entanglement(entity1, entity2, entanglement_strength)
+        
+        # 识别纠缠群组
+        self._identify_entanglement_clusters(entities, correlation_matrix)
+        
+        return self.entanglement_clusters
+    
+    def _identify_entanglement_clusters(self, entities, correlation_matrix, threshold=0.5):
+        """
+        识别纠缠群组
+        
+        Args:
+            entities: 实体列表
+            correlation_matrix: 相关性矩阵
+            threshold: 纠缠强度阈值，高于此值的实体被认为是强相关的
+            
+        Returns:
+            纠缠群组列表
+        """
+        # 创建无向图
+        G = nx.Graph()
+        
+        # 添加节点
+        for entity in entities:
+            G.add_node(entity)
+        
+        # 添加边
+        for (entity1, entity2), correlation in correlation_matrix.items():
+            if correlation >= threshold:
+                G.add_edge(entity1, entity2, weight=correlation)
+        
+        # 查找连通分量（群组）
+        clusters = list(nx.connected_components(G))
+        
+        # 存储纠缠群组
+        self.entanglement_clusters = [list(cluster) for cluster in clusters]
+        
+        return self.entanglement_clusters
+    
+    def get_entanglement_network(self):
+        """
+        获取纠缠网络状态
+        
+        Returns:
+            包含节点、边和群组的字典
+        """
+        # 创建网络状态字典
+        network = {
+            'nodes': [],
+            'edges': [],
+            'clusters': self.entanglement_clusters
+        }
+        
+        # 添加节点
+        for entity, state in self.quantum_states.items():
+            node = {
+                'id': entity,
+                'state': np.abs(state).tolist(),  # 只保存量子态的幅度
+                'phase': np.angle(state).tolist() # 保存相位信息
+            }
+            network['nodes'].append(node)
+        
+        # 添加边（纠缠关系）
+        for entity1, entangled in self.entanglement_matrix.items():
+            for entity2, strength in entangled.items():
+                if entity1 < entity2:  # 避免重复边
+                    edge = {
+                        'source': entity1,
+                        'target': entity2,
+                        'strength': strength
+                    }
+                    network['edges'].append(edge)
+        
+        return network
+    
+    def compute_market_resonance(self, market_data):
+        """
+        计算市场共振状态
+        
+        Args:
+            market_data: 市场数据，格式为 {asset: {feature1: value1, ...}}
+            
+        Returns:
+            共振状态字典，格式为 {asset: resonance_value}
+        """
+        resonance_state = {}
+        
+        # 对每个资产计算共振
+        for asset, data in market_data.items():
+            if asset in self.quantum_states:
+                # 获取量子态
+                state = self.quantum_states[asset]
+                
+                # 计算振幅平方和（概率）
+                amplitudes = np.abs(state) ** 2
+                
+                # 计算共振值（熵的逆）
+                entropy = -np.sum(amplitudes * np.log(amplitudes + 1e-10))
+                max_entropy = np.log(self.dimensions)
+                
+                # 归一化共振值（0-1范围）
+                # 熵越低，共振越高
+                resonance = 1.0 - (entropy / max_entropy)
+                
+                # 考虑市场数据的影响
+                price_change = data.get('price_change_pct', 0)
+                volume = data.get('volume_relative', 1.0)
+                
+                # 调整共振值
+                resonance_adjustment = abs(price_change) * volume * 0.2
+                resonance = min(1.0, resonance + resonance_adjustment)
+                
+                resonance_state[asset] = resonance
+        
+        return resonance_state
+    
+    def predict_market_movement(self, assets):
+        """
+        预测市场走势
+        
+        Args:
+            assets: 资产列表
+            
+        Returns:
+            预测结果字典
+        """
+        predictions = {}
+        
+        for asset in assets:
+            if asset in self.quantum_states:
+                # 获取量子态
+                state = self.quantum_states[asset]
+                
+                # 计算振幅和相位
+                amplitudes = np.abs(state)
+                phases = np.angle(state)
+                
+                # 使用前几个维度的数据计算方向
+                direction_dim = min(4, self.dimensions)
+                direction = np.sum(phases[:direction_dim]) / direction_dim / np.pi
+                
+                # 规范化到-1到1之间
+                direction = max(-1.0, min(1.0, direction))
+                
+                # 计算强度
+                strength = np.mean(amplitudes)
+                
+                # 计算上涨和下跌概率
+                up_probability = (direction + 1) / 2
+                down_probability = 1 - up_probability
+                
+                predictions[asset] = {
+                    'direction': direction,
+                    'strength': strength,
+                    'up_probability': up_probability,
+                    'down_probability': down_probability
+                }
+        
+        return predictions
+
+    def apply_quantum_operations(self, market_data):
+        """
+        应用量子操作处理市场数据
+        
+        Args:
+            market_data: 市场数据字典
+            
+        Returns:
+            更新后的量子态字典
+        """
+        # 对每个资产应用量子操作
+        for asset, data in market_data.items():
+            if asset in self.quantum_states:
+                # 获取当前量子态
+                quantum_state = self.quantum_states[asset]
+                
+                # 应用量子变换
+                transformed_state = self._apply_quantum_transformation(quantum_state, data)
+                
+                # 应用纠缠效应
+                entangled_state = self._apply_entanglement(asset, transformed_state)
+                
+                # 更新量子态
+                self.quantum_states[asset] = entangled_state
+        
+        return self.quantum_states
     
     def _initialize_quantum_state(self, entity_id):
         """

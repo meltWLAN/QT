@@ -1,0 +1,38 @@
+{
+  "app_name": "超神系统中国市场分析",
+  "version": "1.0.0",
+  "data_dir": "~/超神系统/market_data",
+  "cache_dir": "~/超神系统/cache",
+  "log_dir": "~/超神系统/logs",
+  "data_source": {
+    "use_cache": true,
+    "cache_expiry": 3600
+  },
+  "ai_engine": {
+    "risk_sensitivity": 0.7,
+    "trend_factor": 1.0,
+    "noise_reduction": 0.6,
+    "quantum_factor": 0.8
+  },
+  "ui": {
+    "theme": "dark",
+    "auto_refresh": false,
+    "refresh_interval": 300
+  },
+  "market": {
+    "default_stocks": [
+      "600000",
+      "000001",
+      "300059",
+      "603501",
+      "688981"
+    ],
+    "watch_sectors": [
+      "半导体",
+      "人工智能",
+      "新能源",
+      "医药生物",
+      "金融科技"
+    ]
+  }
+} 

@@ -1,41 +1,120 @@
-# 超神量子共生网络交易系统
+# 超神系统 - 中国市场分析模块
 
-## 项目简介
+超神系统中国市场分析模块是专为桌面版设计的高级市场分析组件，提供实时市场数据展示、板块轮动分析、个股推荐和量子AI预测功能。
 
-超神量子共生网络交易系统（Super God-Level Quantum Symbiotic Trading System）是一个先进的量子计算驱动的交易平台，融合了量子计算、人工智能和高频交易技术，为用户提供前沿的市场分析和交易策略。
+## 功能特点
 
-## 系统特点
+- **市场实时数据显示**：展示上证指数、深证成指、创业板指等核心指数的实时数据和涨跌情况
+- **热点板块分析**：展示当前市场热点板块和预测下一轮可能的热点板块
+- **北向资金跟踪**：实时监控北向资金流向，掌握外资动向
+- **量子AI预测**：采用前沿量子算法分析市场趋势，科学评估市场风险
+- **智能个股推荐**：基于行业热点和风险评估推荐潜力个股
+- **投资策略建议**：根据市场情况自动调整仓位建议，辅助投资决策
 
-- **量子共生网络** - 利用量子计算原理进行市场模式识别和预测
-- **高级可视化** - 直观展示量子网络状态和市场预测结果
-- **实时分析** - 对市场数据进行实时处理和分析
-- **自适应策略** - 基于市场状态自动调整交易策略
+## 系统架构
 
-## 安装依赖
+该模块采用MVC架构设计，主要包含以下组件：
 
-```bash
-pip install PyQt5 pyqtgraph numpy pandas qtawesome qt-material qdarkstyle
+1. **数据源层 (data_sources.py)**：负责从各种渠道获取市场数据，支持实时数据和缓存机制
+2. **控制器层 (market_controllers.py)**：处理市场数据的分析和预测逻辑，连接数据源和视图
+3. **AI引擎 (quantum_ai.py)**：基于量子计算概念的高级分析引擎，提供市场趋势和板块轮动预测
+4. **视图层 (china_market_view.py)**：市场数据可视化界面，基于PyQt5实现，提供直观的用户交互
+
+## 安装要求
+
+- Python 3.7+
+- PyQt5
+- NumPy
+- pandas
+
+## 使用方法
+
+### 基本导入
+
+```python
+# 导入模块
+from SuperQuantumNetwork import initialize_market_module
+
+# 初始化（在应用主窗口中）
+initialize_market_module(main_window, tab_widget)
 ```
 
-## 启动系统
+### 手动创建市场视图
 
-```bash
-python launch_supergod.py
+```python
+from SuperQuantumNetwork import create_market_view, MarketDataController
+
+# 创建控制器
+controller = MarketDataController()
+
+# 创建视图
+create_market_view(main_window, tab_widget, controller)
 ```
 
-## 系统模块
+### 使用AI预测引擎
 
-- **数据控制器** - 负责获取和处理市场数据
-- **交易控制器** - 管理交易策略和执行交易
-- **量子网络视图** - 展示量子共生网络的状态和预测
-- **市场视图** - 显示市场行情和趋势
-- **交易视图** - 提供交易界面和订单管理
-- **投资组合视图** - 展示当前持仓和收益情况
+```python
+from SuperQuantumNetwork import get_market_prediction, get_index_data
 
-## 开发团队
+# 获取市场数据
+sh_index = get_index_data('000001.SH')
+sz_index = get_index_data('399001.SZ')
+cyb_index = get_index_data('399006.SZ')
 
-QuantumSymbioticTeam - 致力于将量子计算技术应用于金融交易领域的研发团队
+# 构建市场数据字典
+market_data = {
+    'sh_index': sh_index,
+    'sz_index': sz_index,
+    'cyb_index': cyb_index
+}
 
-## 版本信息
+# 获取预测
+prediction = get_market_prediction(market_data)
+print(prediction)
+```
 
-当前版本: v0.2.0 
+## 配置选项
+
+系统提供多种配置选项，可通过传递配置字典来自定义行为：
+
+```python
+# AI引擎配置
+ai_config = {
+    'risk_sensitivity': 0.7,  # 风险敏感度 (0-1)
+    'trend_factor': 1.0,      # 趋势因子
+    'noise_reduction': 0.6,   # 噪声减少因子
+    'quantum_factor': 0.8     # 量子因子
+}
+
+# 数据源配置
+data_config = {
+    'use_cache': True,        # 是否使用缓存
+    'cache_expiry': 3600,     # 缓存过期时间(秒)
+    'cache_dir': '~/超神系统/cache'  # 缓存目录
+}
+
+# 创建控制器时传入配置
+controller = MarketDataController(config={
+    'ai_config': ai_config,
+    'data_dir': '~/超神系统/market_data'
+})
+```
+
+## 开发扩展
+
+系统设计支持灵活扩展，您可以通过以下方式进行定制：
+
+1. **添加新数据源**：扩展 `data_sources.py` 以支持更多数据获取渠道
+2. **增强AI模型**：在 `quantum_ai.py` 中添加更复杂的分析模型
+3. **自定义界面**：扩展 `china_market_view.py` 以添加更多可视化组件
+
+## 注意事项
+
+- 本模块仅用于市场分析和参考，不构成投资建议
+- 在首次使用时，系统会自动创建必要的目录和配置文件
+- 当实际数据源不可用时，系统会自动切换到模拟数据模式
+- 日志文件保存在 `~/超神系统/logs/` 目录下
+
+## 许可证
+
+版权所有 © 2023 超神系统开发团队 

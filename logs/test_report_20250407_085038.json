@@ -1,0 +1,13 @@
+{
+  "summary": {
+    "total": 21,
+    "success": 21,
+    "failure": 0,
+    "error": 0,
+    "runtime": "23.79秒",
+    "success_rate": "100.0%",
+    "timestamp": "2025-04-07 08:50:38"
+  },
+  "failures": [],
+  "errors": []
+}

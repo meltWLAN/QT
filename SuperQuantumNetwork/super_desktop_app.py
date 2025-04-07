@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
 超神量子共生网络交易系统 - 桌面应用入口
-集成了高级启动画面和全部功能
+集成了高级启动画面、量子预测引擎和中国股市分析模块
 """
 
 import sys
 import os
 import logging
 import traceback
-from PyQt5.QtWidgets import QApplication, QMessageBox
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtWidgets import QApplication, QMessageBox, QAction, QMenu
+from PyQt5.QtCore import Qt, QTimer, pyqtSignal
+from PyQt5.QtGui import QIcon
 import time
 
 # 配置日志
@@ -321,13 +322,46 @@ def load_stylesheet():
             selection-background-color: #003366;
             selection-color: #FFFFFF;
         }
+        
+        /* 中国市场分析模块专用样式 */
+        #chinaMarketWidget {
+            background-color: #0A1028;
+            border: 1px solid #304060;
+            border-radius: 6px;
+        }
+        
+        #marketIndexLabel {
+            color: #00FFAA;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .StockUpLabel {
+            color: #FF4444;
+        }
+        
+        .StockDownLabel {
+            color: #44FF44;
+        }
+        
+        .HotSectorLabel {
+            color: #FFAA00;
+            font-weight: bold;
+        }
+        
+        /* 量子网络可视化面板样式 */
+        #quantumVisualizerPanel {
+            background-color: #050510;
+            border: 1px solid #101040;
+            border-radius: 8px;
+        }
         """
 
 
 def main():
     """主函数"""
     # 记录启动信息
-    logger.info("超神量子共生网络交易系统 v0.2.0 启动中")
+    logger.info("超神量子共生网络交易系统 v1.0.0 启动中")
     
     # 确保当前目录是脚本所在目录
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -336,7 +370,7 @@ def main():
         # 创建应用
         app = QApplication(sys.argv)
         app.setApplicationName("超神量子共生网络交易系统")
-        app.setApplicationVersion("0.2.0")
+        app.setApplicationVersion("1.0.0")
         app.setAttribute(Qt.AA_UseHighDpiPixmaps)
         
         # 使用Fusion风格，与暗色主题更匹配
@@ -350,6 +384,17 @@ def main():
         
         # 加载控制器
         data_controller, trading_controller = load_controllers()
+        
+        # 尝试加载中国市场控制器
+        try:
+            from china_market.controllers.market_controller import ChinaMarketController
+            china_controller = ChinaMarketController()
+            logger.info("中国市场控制器加载成功")
+            has_china_market = True
+        except Exception as e:
+            logger.warning(f"中国市场控制器加载失败: {str(e)}")
+            china_controller = None
+            has_china_market = False
         
         # 加载主窗口类
         MainWindow = try_load_advanced_window()
@@ -376,6 +421,63 @@ def main():
                 except:
                     logger.warning("后备样式加载失败")
         
+        # 添加中国市场分析标签页
+        if has_china_market:
+            try:
+                from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QPushButton, QHBoxLayout, QTableWidget, QTableWidgetItem
+                
+                # 创建中国市场标签页
+                china_tab = QWidget()
+                main_window.tab_widget.addTab(china_tab, "中国市场")
+                
+                # 创建布局
+                china_layout = QVBoxLayout(china_tab)
+                
+                # 市场指数面板
+                market_index_label = QLabel("市场指数")
+                market_index_label.setProperty("class", "title-label")
+                china_layout.addWidget(market_index_label)
+                
+                # 指数信息
+                index_layout = QHBoxLayout()
+                sh_index = QLabel(f"上证指数: {china_controller.market_data.get('sh_index', {}).get('close', 0):.2f}")
+                sz_index = QLabel(f"深证成指: {china_controller.market_data.get('sz_index', {}).get('close', 0):.2f}")
+                cy_index = QLabel(f"创业板指: {china_controller.market_data.get('cyb_index', {}).get('close', 0):.2f}")
+                
+                index_layout.addWidget(sh_index)
+                index_layout.addWidget(sz_index)
+                index_layout.addWidget(cy_index)
+                china_layout.addLayout(index_layout)
+                
+                # 板块热点
+                hot_sector_label = QLabel("热点板块")
+                hot_sector_label.setProperty("class", "title-label")
+                china_layout.addWidget(hot_sector_label)
+                
+                # 刷新与预测按钮
+                buttons_layout = QHBoxLayout()
+                refresh_btn = QPushButton("刷新数据")
+                predict_btn = QPushButton("超神预测")
+                
+                # 连接按钮信号
+                refresh_btn.clicked.connect(lambda: china_controller.update_market_data())
+                predict_btn.clicked.connect(lambda: china_controller.predict_market_trend())
+                
+                buttons_layout.addWidget(refresh_btn)
+                buttons_layout.addWidget(predict_btn)
+                china_layout.addLayout(buttons_layout)
+                
+                # 添加推荐表
+                stock_table = QTableWidget(5, 4)
+                stock_table.setHorizontalHeaderLabels(["代码", "名称", "操作", "当前价"])
+                china_layout.addWidget(stock_table)
+                
+                # 记录成功
+                logger.info("成功加载中国市场视图")
+                
+            except Exception as e:
+                logger.error(f"加载中国市场标签页失败: {str(e)}")
+        
         # 显示主窗口回调
         def on_splash_finished():
             # 显示主窗口
@@ -398,51 +500,42 @@ def main():
             if i == 1:
                 message = "正在初始化量子网络..."
             elif i == 2:
-                message = "正在加载市场数据..."
+                message = "加载交易引擎..."
             elif i == 3:
-                message = "正在构建交易模型..."
+                message = "连接市场数据源..."
             elif i == 4:
-                message = "正在连接交易服务器..."
+                message = "正在加载中国股市分析模块..."
             else:
-                message = "准备就绪..."
-            
-            # 更新进度
-            if hasattr(splash, 'progressChanged'):
-                splash.progressChanged.emit(progress, message)
-            
-            # 处理事件
+                message = "即将完成，请稍候..."
+                
+            # 更新启动画面
+            if hasattr(splash, 'showMessage'):
+                splash.showMessage(f"{message} {progress}%", Qt.AlignBottom | Qt.AlignHCenter)
+            if hasattr(splash, 'setProgress'):
+                splash.setProgress(progress)
+                
+            # 处理事件并等待
             app.processEvents()
-            
-            # 延迟
-            time.sleep(0.5)
+            time.sleep(0.5)  # 模拟加载延迟
         
-        # 延迟结束
-        time.sleep(0.5)
-        
-        # 如果是高级启动画面，发送完成信号
-        if hasattr(splash, 'progressChanged'):
-            splash.progressChanged.emit(100, "启动完成")
-        if hasattr(splash, 'finished'):
-            splash.finished.emit()
-        
-        # 启动应用
+        # 运行应用
         return app.exec_()
-    
+        
     except Exception as e:
-        # 记录错误
-        logger.error(f"启动失败: {str(e)}")
+        logger.error(f"应用启动失败: {str(e)}")
         logger.error(traceback.format_exc())
         
         # 尝试显示错误消息
         try:
-            QMessageBox.critical(None, "启动失败", 
-                            f"错误: {str(e)}\n\n{traceback.format_exc()}")
+            app = QApplication(sys.argv)
+            QMessageBox.critical(None, "超神系统启动失败",
+                                f"错误: {str(e)}\n\n{traceback.format_exc()}")
         except:
             print(f"严重错误: {str(e)}")
             print(traceback.format_exc())
-        
+            
         return 1
 
 
 if __name__ == "__main__":
-    sys.exit(main()) 
+    sys.exit(main())

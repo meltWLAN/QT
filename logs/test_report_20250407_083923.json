@@ -1,0 +1,18 @@
+{
+  "summary": {
+    "total": 22,
+    "success": 21,
+    "failure": 0,
+    "error": 1,
+    "runtime": "26.11秒",
+    "success_rate": "95.5%",
+    "timestamp": "2025-04-07 08:39:23"
+  },
+  "failures": [],
+  "errors": [
+    {
+      "test": "tests.test_quantum_entanglement (unittest.loader._FailedTest)",
+      "traceback": "ImportError: Failed to import test module: tests.test_quantum_entanglement\nTraceback (most recent call last):\n  File \"/Users/mac/.pyenv/versions/3.10.12/lib/python3.10/unittest/loader.py\", line 436, in _find_test_path\n    module = self._get_module_from_name(name)\n  File \"/Users/mac/.pyenv/versions/3.10.12/lib/python3.10/unittest/loader.py\", line 377, in _get_module_from_name\n    __import__(name)\n  File \"/Users/mac/Desktop/超神系统/tests/test_quantum_entanglement.py\", line 19, in <module>\n    from SuperQuantumNetwork.quantum_symbiotic_network.core.quantum_entanglement_engine import (\nImportError: cannot import name 'EntanglementProperty' from 'SuperQuantumNetwork.quantum_symbiotic_network.core.quantum_entanglement_engine' (/Users/mac/Desktop/超神系统/SuperQuantumNetwork/quantum_symbiotic_network/core/quantum_entanglement_engine.py)\n\n"
+    }
+  ]
+}

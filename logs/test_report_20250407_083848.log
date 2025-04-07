@@ -1,0 +1,388 @@
+2025-04-07 08:38:48,368 - TestRunner - INFO - 开始运行超神系统功能测试套件...
+2025-04-07 08:38:48,369 - TestRunner - INFO - 开始发现测试用例...
+2025-04-07 08:38:54,474 - SuperQuantumNetwork - INFO - 超神系统中国市场分析模块 v1.0.0 初始化成功
+2025-04-07 08:38:56,923 - QuantumSymbioticNetwork - INFO - 量子共生网络 v0.2.0 已初始化
+2025-04-07 08:38:56,924 - QuantumSymbioticNetwork - INFO - 初始化量子共生网络系统...
+2025-04-07 08:38:56,936 - TestRunner - INFO - GUI测试已加载
+2025-04-07 08:38:56,936 - TestRunner - INFO - 共发现 22 个测试用例
+2025-04-07 08:38:56,936 - TestRunner - INFO - 开始执行测试...
+2025-04-07 08:38:58,144 - GuiTest - INFO - 创建Qt应用实例
+2025-04-07 08:38:58,156 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 20 条历史预测记录
+2025-04-07 08:38:58,156 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:38:58,156 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:01,085 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:01,086 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:01,087 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:01,087 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:01,089 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:01,092 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:01,093 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:01,095 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:01,096 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:01,096 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:01,097 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:01,097 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:01,100 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:01,100 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:01,101 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:01,103 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:02,169 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:02,202 - GuiTest - INFO - 检测到市场数据: 3177.67
+2025-04-07 08:39:02,379 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:02,389 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 20 条历史预测记录
+2025-04-07 08:39:02,389 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:02,390 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:02,978 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:02,978 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:02,979 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:02,984 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:02,985 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:02,985 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:02,987 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:02,989 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:02,994 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:02,998 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:03,003 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:03,004 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:03,007 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:03,011 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:03,014 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:03,014 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:03,763 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:03,766 - GuiTest - INFO - 检测到标签页: 中国市场分析
+2025-04-07 08:39:03,875 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:03,879 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 20 条历史预测记录
+2025-04-07 08:39:03,879 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:03,880 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:04,583 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:04,583 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:04,585 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:04,586 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:04,587 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:04,587 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:04,587 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:04,587 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:04,588 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:04,588 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:04,588 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:04,588 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:04,588 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:04,588 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:04,589 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:04,589 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:05,529 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:05,529 - GuiTest - INFO - 原始窗口尺寸: 1223x798
+2025-04-07 08:39:06,674 - GuiTest - INFO - 调整后窗口尺寸: 1323x798
+2025-04-07 08:39:06,772 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:06,774 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 20 条历史预测记录
+2025-04-07 08:39:06,774 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:06,774 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:08,013 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:08,054 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:08,055 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:08,057 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:08,058 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:08,059 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:08,059 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:08,062 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:08,063 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:08,064 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:08,065 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:08,066 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:08,067 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:08,071 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:08,073 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:08,074 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:08,078 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:08,079 - GuiTest - INFO - 仅有一个标签页，跳过导航测试
+2025-04-07 08:39:08,176 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:08,178 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 20 条历史预测记录
+2025-04-07 08:39:08,178 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:08,178 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:09,105 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:09,106 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:09,106 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:09,107 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:09,107 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:09,107 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:09,108 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:09,108 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:09,108 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:09,109 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:09,109 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:09,109 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:09,109 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:09,109 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:09,111 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:09,111 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:09,966 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:09,966 - GuiTest - INFO - 标签页组件验证通过
+2025-04-07 08:39:10,160 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:10,161 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 20 条历史预测记录
+2025-04-07 08:39:10,161 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:10,162 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:10,761 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:10,762 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:10,763 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:10,763 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:10,764 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:10,765 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:10,765 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:10,766 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:10,766 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:10,789 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:10,789 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:10,789 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:10,790 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:10,790 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:10,791 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:10,791 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:11,721 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:11,721 - GuiTest - INFO - 窗口标题验证通过: 超神系统 - 中国市场分析
+2025-04-07 08:39:11,858 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:11,859 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 20 条历史预测记录
+2025-04-07 08:39:11,860 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:11,860 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:11,860 - MarketModuleTest - INFO - 测试市场数据更新...
+2025-04-07 08:39:11,860 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:11,861 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:11,862 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:11,862 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:11,862 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:11,863 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:11,871 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:11,872 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:11,872 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:11,877 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:11,877 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:11,877 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:11,878 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:11,878 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:11,879 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:11,880 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:11,880 - MarketModuleTest - INFO - 市场数据更新成功: 2025-04-07 08:23:32
+2025-04-07 08:39:11,881 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 20 条历史预测记录
+2025-04-07 08:39:11,882 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:11,882 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:11,885 - MarketModuleTest - INFO - 测试投资组合生成...
+2025-04-07 08:39:11,886 - SuperQuantumNetwork.market_controllers - INFO - 生成投资组合建议...
+2025-04-07 08:39:11,886 - SuperQuantumNetwork.market_controllers - INFO - 开始市场趋势预测...
+2025-04-07 08:39:11,886 - SuperQuantumNetwork.quantum_ai - INFO - 开始市场预测...
+2025-04-07 08:39:11,894 - SuperQuantumNetwork.quantum_ai - INFO - 保存了 21 条历史预测记录
+2025-04-07 08:39:11,894 - SuperQuantumNetwork.quantum_ai - INFO - 市场预测完成
+2025-04-07 08:39:11,897 - SuperQuantumNetwork.market_controllers - INFO - 预测结果保存到: /Users/mac/超神系统/market_data/prediction_20250407_083911.json
+2025-04-07 08:39:11,898 - SuperQuantumNetwork.market_controllers - INFO - 市场趋势预测完成
+2025-04-07 08:39:11,899 - SuperQuantumNetwork.data_sources - INFO - 获取行业股票数据: 金融科技
+2025-04-07 08:39:11,902 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的股票数据: sector_stocks_金融科技
+2025-04-07 08:39:11,903 - SuperQuantumNetwork.data_sources - INFO - 获取行业股票数据: 云计算
+2025-04-07 08:39:11,906 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的股票数据: sector_stocks_云计算
+2025-04-07 08:39:11,907 - SuperQuantumNetwork.data_sources - INFO - 获取行业股票数据: 机器人
+2025-04-07 08:39:11,910 - SuperQuantumNetwork.data_sources - INFO - 获取行业股票数据: 军工
+2025-04-07 08:39:11,911 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的股票数据: sector_stocks_军工
+2025-04-07 08:39:11,914 - SuperQuantumNetwork.data_sources - INFO - 获取行业股票数据: 智能汽车
+2025-04-07 08:39:11,917 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的股票数据: sector_stocks_智能汽车
+2025-04-07 08:39:11,919 - SuperQuantumNetwork.market_controllers - INFO - 投资组合建议生成完成
+2025-04-07 08:39:11,919 - MarketModuleTest - INFO - 投资组合建议: 建议仓位 0.63
+2025-04-07 08:39:11,919 - MarketModuleTest - INFO - 行业配置: 金融科技 - 0.40
+2025-04-07 08:39:11,919 - MarketModuleTest - INFO - 行业配置: 云计算 - 0.30
+2025-04-07 08:39:11,920 - MarketModuleTest - INFO - 行业配置: 机器人 - 0.20
+2025-04-07 08:39:11,920 - MarketModuleTest - INFO - 行业配置: 军工 - 0.05
+2025-04-07 08:39:11,920 - MarketModuleTest - INFO - 行业配置: 智能汽车 - 0.05
+2025-04-07 08:39:11,921 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 21 条历史预测记录
+2025-04-07 08:39:11,922 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:11,922 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:11,922 - MarketModuleTest - INFO - 测试市场趋势预测...
+2025-04-07 08:39:11,926 - SuperQuantumNetwork.market_controllers - INFO - 开始市场趋势预测...
+2025-04-07 08:39:11,927 - SuperQuantumNetwork.quantum_ai - INFO - 开始市场预测...
+2025-04-07 08:39:11,938 - SuperQuantumNetwork.quantum_ai - INFO - 保存了 22 条历史预测记录
+2025-04-07 08:39:11,939 - SuperQuantumNetwork.quantum_ai - INFO - 市场预测完成
+2025-04-07 08:39:11,940 - SuperQuantumNetwork.market_controllers - INFO - 预测结果保存到: /Users/mac/超神系统/market_data/prediction_20250407_083911.json
+2025-04-07 08:39:11,941 - SuperQuantumNetwork.market_controllers - INFO - 市场趋势预测完成
+2025-04-07 08:39:11,942 - MarketModuleTest - INFO - 市场预测完成: 2025-04-07 08:39:11
+2025-04-07 08:39:11,943 - MarketModuleTest - INFO - 测试获取指数数据...
+2025-04-07 08:39:11,944 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:11,945 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:11,945 - MarketModuleTest - INFO - 上证指数: 3177.667240627941 (0.3750441586815677%)
+2025-04-07 08:39:11,945 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:11,946 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:11,946 - MarketModuleTest - INFO - 深证成指: 10274.064327326652 (0.3205454147605775%)
+2025-04-07 08:39:11,947 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:11,947 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:11,947 - MarketModuleTest - INFO - 创业板指: 2250.3325428226162 (1.1609550770809365%)
+2025-04-07 08:39:11,948 - MarketModuleTest - INFO - 测试获取北向资金数据...
+2025-04-07 08:39:11,951 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:11,952 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:11,953 - MarketModuleTest - INFO - 北向资金今日净流入: -650075277.526763
+2025-04-07 08:39:11,953 - MarketModuleTest - INFO - 北向资金5日净流入: -1818616549.4791603
+2025-04-07 08:39:11,953 - MarketModuleTest - INFO - 测试获取板块数据...
+2025-04-07 08:39:11,954 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:11,954 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:11,954 - MarketModuleTest - INFO - 热点板块: 智能汽车, 半导体, 新能源
+2025-04-07 08:39:11,955 - MarketModuleTest - INFO - 测试获取行业个股数据...
+2025-04-07 08:39:11,956 - SuperQuantumNetwork.data_sources - INFO - 获取股票数据: 半导体
+2025-04-07 08:39:11,958 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的股票数据: stock_半导体
+2025-04-07 08:39:11,959 - MarketModuleTest - INFO - 半导体行业股票: 1只
+2025-04-07 08:39:11,962 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 22 条历史预测记录
+2025-04-07 08:39:11,962 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:11,963 - MarketModuleTest - INFO - 测试市场预测功能...
+2025-04-07 08:39:11,969 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 22 条历史预测记录
+2025-04-07 08:39:11,969 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:11,970 - SuperQuantumNetwork.quantum_ai - INFO - 开始市场预测...
+2025-04-07 08:39:11,978 - SuperQuantumNetwork.quantum_ai - INFO - 保存了 23 条历史预测记录
+2025-04-07 08:39:11,979 - SuperQuantumNetwork.quantum_ai - INFO - 市场预测完成
+2025-04-07 08:39:11,988 - MarketModuleTest - INFO - 市场风险: 0.33, 趋势: 震荡上行
+2025-04-07 08:39:11,989 - MarketModuleTest - INFO - 下一轮潜在热点: 金融科技, 云计算, 区块链
+2025-04-07 08:39:11,991 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 23 条历史预测记录
+2025-04-07 08:39:11,991 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:11,991 - MarketModuleTest - INFO - 测试投资组合建议功能...
+2025-04-07 08:39:11,992 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 23 条历史预测记录
+2025-04-07 08:39:11,993 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:11,993 - SuperQuantumNetwork.quantum_ai - INFO - 开始市场预测...
+2025-04-07 08:39:12,004 - SuperQuantumNetwork.quantum_ai - INFO - 保存了 24 条历史预测记录
+2025-04-07 08:39:12,006 - SuperQuantumNetwork.quantum_ai - INFO - 市场预测完成
+2025-04-07 08:39:12,008 - MarketModuleTest - INFO - 建议仓位: 0.67
+2025-04-07 08:39:12,009 - MarketModuleTest - INFO - 股票推荐: 金融科技1(698613), 行业: 金融科技, 动作: 买入
+2025-04-07 08:39:12,009 - MarketModuleTest - INFO - 股票推荐: 金融科技2(457543), 行业: 金融科技, 动作: 关注
+2025-04-07 08:39:12,010 - MarketModuleTest - INFO - 股票推荐: 云计算1(489948), 行业: 云计算, 动作: 关注
+2025-04-07 08:39:12,013 - GuiTest - INFO - 创建Qt应用实例
+2025-04-07 08:39:12,020 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 24 条历史预测记录
+2025-04-07 08:39:12,021 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:12,021 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:13,775 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:13,776 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:13,777 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:13,777 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:13,778 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:13,779 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:13,785 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:13,786 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:13,786 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:13,787 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:13,787 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:13,788 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:13,788 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:13,789 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:13,796 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:13,797 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:13,800 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:14,150 - GuiTest - INFO - 检测到市场数据: 3177.67
+2025-04-07 08:39:14,383 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:14,384 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 24 条历史预测记录
+2025-04-07 08:39:14,384 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:14,384 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:15,159 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:15,160 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:15,161 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:15,161 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:15,162 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:15,162 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:15,168 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:15,170 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:15,170 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:15,171 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:15,172 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:15,172 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:15,174 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:15,175 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:15,177 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:15,178 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:16,088 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:16,091 - GuiTest - INFO - 检测到标签页: 中国市场分析
+2025-04-07 08:39:16,220 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:16,223 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 24 条历史预测记录
+2025-04-07 08:39:16,224 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:16,224 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:17,437 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:17,438 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:17,438 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:17,439 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:17,439 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:17,439 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:17,440 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:17,440 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:17,440 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:17,441 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:17,444 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:17,445 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:17,445 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:17,446 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:17,447 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:17,447 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:17,448 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:17,449 - GuiTest - INFO - 原始窗口尺寸: 1223x798
+2025-04-07 08:39:18,542 - GuiTest - INFO - 调整后窗口尺寸: 1323x798
+2025-04-07 08:39:18,641 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:18,644 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 24 条历史预测记录
+2025-04-07 08:39:18,645 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:18,645 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:19,907 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:19,907 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:19,908 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:19,908 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:19,908 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:19,908 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:19,908 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:19,908 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:19,909 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:19,910 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:19,910 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:19,910 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:19,910 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:19,910 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:19,911 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:19,912 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:19,919 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:19,920 - GuiTest - INFO - 仅有一个标签页，跳过导航测试
+2025-04-07 08:39:20,014 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:20,020 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 24 条历史预测记录
+2025-04-07 08:39:20,021 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:20,021 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:21,314 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:21,316 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:21,317 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:21,317 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:21,318 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:21,319 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:21,320 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:21,320 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:21,326 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:21,331 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:21,332 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:21,332 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:21,334 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:21,335 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:21,341 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:21,343 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:21,352 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:21,353 - GuiTest - INFO - 标签页组件验证通过
+2025-04-07 08:39:21,443 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:21,445 - SuperQuantumNetwork.quantum_ai - INFO - 加载了 24 条历史预测记录
+2025-04-07 08:39:21,445 - SuperQuantumNetwork.quantum_ai - INFO - 量子AI引擎初始化完成
+2025-04-07 08:39:21,445 - SuperQuantumNetwork.market_controllers - INFO - 量子AI引擎初始化成功
+2025-04-07 08:39:21,974 - SuperQuantumNetwork.market_controllers - INFO - 开始更新市场数据...
+2025-04-07 08:39:21,979 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 000001.SH
+2025-04-07 08:39:21,981 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 000001.SH
+2025-04-07 08:39:21,982 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399001.SZ
+2025-04-07 08:39:21,986 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399001.SZ
+2025-04-07 08:39:21,986 - SuperQuantumNetwork.data_sources - INFO - 获取指数数据: 399006.SZ
+2025-04-07 08:39:21,991 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的指数数据: 399006.SZ
+2025-04-07 08:39:21,992 - SuperQuantumNetwork.market_controllers - INFO - 市场指数数据更新成功
+2025-04-07 08:39:21,997 - SuperQuantumNetwork.data_sources - INFO - 获取北向资金数据
+2025-04-07 08:39:21,999 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的北向资金数据
+2025-04-07 08:39:21,999 - SuperQuantumNetwork.market_controllers - INFO - 北向资金数据更新成功
+2025-04-07 08:39:22,001 - SuperQuantumNetwork.data_sources - INFO - 获取板块数据
+2025-04-07 08:39:22,003 - SuperQuantumNetwork.data_sources - INFO - 使用缓存的板块数据
+2025-04-07 08:39:22,012 - SuperQuantumNetwork.market_controllers - INFO - 板块数据更新成功
+2025-04-07 08:39:22,028 - SuperQuantumNetwork.market_controllers - INFO - 市场数据保存到: /Users/mac/超神系统/market_data/market_data_20250407.json
+2025-04-07 08:39:22,028 - SuperQuantumNetwork.market_controllers - INFO - 市场数据更新完成
+2025-04-07 08:39:22,919 - GuiTest - INFO - 测试窗口创建完成
+2025-04-07 08:39:22,920 - GuiTest - INFO - 窗口标题验证通过: 超神系统 - 中国市场分析
+2025-04-07 08:39:23,041 - GuiTest - INFO - 测试窗口已关闭
+2025-04-07 08:39:23,044 - TestRunner - INFO - 测试报告已保存到: /Users/mac/Desktop/超神系统/logs/test_report_20250407_083923.json
+2025-04-07 08:39:23,044 - TestRunner - INFO - ==== 测试汇总 ====
+2025-04-07 08:39:23,044 - TestRunner - INFO - 总测试: 22
+2025-04-07 08:39:23,044 - TestRunner - INFO - 成功: 21
+2025-04-07 08:39:23,044 - TestRunner - INFO - 失败: 0
+2025-04-07 08:39:23,044 - TestRunner - INFO - 错误: 1
+2025-04-07 08:39:23,044 - TestRunner - INFO - 运行时间: 26.11秒
+2025-04-07 08:39:23,044 - TestRunner - INFO - 成功率: 95.5%

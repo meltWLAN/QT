@@ -1,0 +1,35 @@
+{
+  "summary": {
+    "total": 22,
+    "success": 17,
+    "failure": 4,
+    "error": 1,
+    "runtime": "18.85秒",
+    "success_rate": "77.3%",
+    "timestamp": "2025-04-07 08:37:18"
+  },
+  "failures": [
+    {
+      "test": "test_market_data_displayed (tests.functional.test_gui.SuperGodGuiTest)",
+      "traceback": "Traceback (most recent call last):\n  File \"/Users/mac/Desktop/超神系统/tests/functional/test_gui.py\", line 116, in test_market_data_displayed\n    labels = current_page.findChildren(QLabel)\nNameError: name 'QLabel' is not defined\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/mac/Desktop/超神系统/tests/functional/test_gui.py\", line 134, in test_market_data_displayed\n    self.fail(f\"测试市场数据显示失败: {str(e)}\")\nAssertionError: 测试市场数据显示失败: name 'QLabel' is not defined\n"
+    },
+    {
+      "test": "test_resize_behavior (tests.functional.test_gui.SuperGodGuiTest)",
+      "traceback": "Traceback (most recent call last):\n  File \"/Users/mac/Desktop/超神系统/tests/functional/test_gui.py\", line 178, in test_resize_behavior\n    self.assertAlmostEqual(current_size.height(), new_height, delta=20)\nAssertionError: 798 != 898 within 20 delta (100 difference)\n"
+    },
+    {
+      "test": "test_market_data_displayed (tests.functional.test_gui.SuperGodGuiTest)",
+      "traceback": "Traceback (most recent call last):\n  File \"/Users/mac/Desktop/超神系统/tests/functional/test_gui.py\", line 116, in test_market_data_displayed\n    labels = current_page.findChildren(QLabel)\nNameError: name 'QLabel' is not defined\n\nDuring handling of the above exception, another exception occurred:\n\nTraceback (most recent call last):\n  File \"/Users/mac/Desktop/超神系统/tests/functional/test_gui.py\", line 134, in test_market_data_displayed\n    self.fail(f\"测试市场数据显示失败: {str(e)}\")\nAssertionError: 测试市场数据显示失败: name 'QLabel' is not defined\n"
+    },
+    {
+      "test": "test_resize_behavior (tests.functional.test_gui.SuperGodGuiTest)",
+      "traceback": "Traceback (most recent call last):\n  File \"/Users/mac/Desktop/超神系统/tests/functional/test_gui.py\", line 178, in test_resize_behavior\n    self.assertAlmostEqual(current_size.height(), new_height, delta=20)\nAssertionError: 798 != 898 within 20 delta (100 difference)\n"
+    }
+  ],
+  "errors": [
+    {
+      "test": "tests.test_quantum_entanglement (unittest.loader._FailedTest)",
+      "traceback": "ImportError: Failed to import test module: tests.test_quantum_entanglement\nTraceback (most recent call last):\n  File \"/Users/mac/.pyenv/versions/3.10.12/lib/python3.10/unittest/loader.py\", line 436, in _find_test_path\n    module = self._get_module_from_name(name)\n  File \"/Users/mac/.pyenv/versions/3.10.12/lib/python3.10/unittest/loader.py\", line 377, in _get_module_from_name\n    __import__(name)\n  File \"/Users/mac/Desktop/超神系统/tests/test_quantum_entanglement.py\", line 19, in <module>\n    from SuperQuantumNetwork.quantum_symbiotic_network.core.quantum_entanglement_engine import (\nImportError: cannot import name 'EntanglementProperty' from 'SuperQuantumNetwork.quantum_symbiotic_network.core.quantum_entanglement_engine' (/Users/mac/Desktop/超神系统/SuperQuantumNetwork/quantum_symbiotic_network/core/quantum_entanglement_engine.py)\n\n"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+2025-04-07 08:35:50,805 - TestRunner - INFO - 开始运行超神系统功能测试套件...
+2025-04-07 08:35:50,806 - TestRunner - INFO - 开始发现测试用例...
+2025-04-07 08:35:50,806 - TestRunner - ERROR - 运行测试时出错: Start directory is not importable: '/Users/mac/Desktop/超神系统/tests'
+2025-04-07 08:35:50,808 - TestRunner - ERROR - Traceback (most recent call last):
+  File "/Users/mac/Desktop/超神系统/tests/functional/run_all_tests.py", line 133, in run_all_tests
+    test_suite = discover_tests()
+  File "/Users/mac/Desktop/超神系统/tests/functional/run_all_tests.py", line 44, in discover_tests
+    test_suite = test_loader.discover(
+  File "/Users/mac/.pyenv/versions/3.10.12/lib/python3.10/unittest/loader.py", line 346, in discover
+    raise ImportError('Start directory is not importable: %r' % start_dir)
+ImportError: Start directory is not importable: '/Users/mac/Desktop/超神系统/tests'
+
