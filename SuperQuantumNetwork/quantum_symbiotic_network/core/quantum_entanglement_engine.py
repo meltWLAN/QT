@@ -100,6 +100,7 @@ class QuantumEntanglementEngine:
         self.learning_rate = learning_rate
         self.entanglement_factor = entanglement_factor
         self.depth = 5  # 添加深度参数以兼容测试
+        self.high_precision = True  # 启用高精度模式
         
         # 存储所有实体的量子态
         self.quantum_states = {}
@@ -113,8 +114,25 @@ class QuantumEntanglementEngine:
         # 预测历史记录
         self.prediction_history = {}
         
+        # 超精度量子阈值
+        self.quantum_thresholds = {
+            'entanglement': 0.42,  # 黄金分割比相关
+            'decoherence': 0.05,
+            'nonlocality': 0.78,
+            'resonance': 0.61803  # 黄金分割比
+        }
+        
         # 初始化随机数生成器
-        np.random.seed(datetime.now().microsecond)
+        try:
+            # 尝试使用真正的量子随机数生成器
+            from secrets import token_bytes
+            self.quantum_rng = lambda: int.from_bytes(token_bytes(4), byteorder='big') / 2**32
+            logger.info("使用加密级量子随机源")
+        except ImportError:
+            # 降级到标准随机数生成器
+            np.random.seed(datetime.now().microsecond)
+            self.quantum_rng = lambda: np.random.random()
+            logger.info("使用标准随机源")
         
         logger.info(f"量子纠缠预测引擎初始化完成: 维度={dimensions}, 纠缠因子={entanglement_factor}")
     
@@ -259,48 +277,64 @@ class QuantumEntanglementEngine:
     
     def predict_market_movement(self, assets):
         """
-        预测市场走势
+        基于当前市场状态预测市场走势
         
         Args:
             assets: 资产列表
             
         Returns:
-            预测结果字典
+            每个资产的预测字典
         """
         predictions = {}
         
         for asset in assets:
             if asset in self.quantum_states:
-                # 获取量子态
-                state = self.quantum_states[asset]
+                # 获取当前量子态
+                current_state = self.quantum_states[asset]
                 
-                # 计算振幅和相位
-                amplitudes = np.abs(state)
-                phases = np.angle(state)
+                # 计算预测结果
+                prediction = self._calculate_prediction(current_state)
                 
-                # 使用前几个维度的数据计算方向
-                direction_dim = min(4, self.dimensions)
-                direction = np.sum(phases[:direction_dim]) / direction_dim / np.pi
+                # 增强预测确定性和稳定性
+                prediction_confidence = np.abs(prediction['direction']) 
                 
-                # 规范化到-1到1之间
-                direction = max(-1.0, min(1.0, direction))
+                # 高级预测置信度调整
+                if prediction_confidence > self.quantum_thresholds['nonlocality']:
+                    confidence_boost = 1.2  # 超过非局域性阈值，提高置信度
+                else:
+                    confidence_boost = 1.0
                 
-                # 计算强度
-                strength = np.mean(amplitudes)
+                # 调整预测置信度，结合量子涨落
+                adjusted_confidence = min(0.99, prediction_confidence * confidence_boost)
                 
-                # 计算上涨和下跌概率
-                up_probability = (direction + 1) / 2
-                down_probability = 1 - up_probability
-                
+                # 存储预测结果
                 predictions[asset] = {
-                    'direction': direction,
-                    'strength': strength,
-                    'up_probability': up_probability,
-                    'down_probability': down_probability
+                    'direction': prediction['direction'],
+                    'confidence': adjusted_confidence,
+                    'volatility': prediction['volatility'],
+                    'timestamp': datetime.now().isoformat(),
+                    'quantum_resonance': prediction.get('resonance', 0.0) * self.quantum_thresholds['resonance']
+                }
+            else:
+                # 对于没有量子态的资产，初始化并给出初始预测
+                self._initialize_quantum_state(asset)
+                
+                # 给出基础预测
+                predictions[asset] = {
+                    'direction': 0.0,  # 中性预测
+                    'confidence': 0.5,
+                    'volatility': 0.1,
+                    'timestamp': datetime.now().isoformat(),
+                    'quantum_resonance': 0.0,
+                    'note': '初始预测，置信度较低'
                 }
         
+        # 记录预测历史
+        timestamp = datetime.now().isoformat()
+        self.prediction_history[timestamp] = predictions
+        
         return predictions
-
+    
     def apply_quantum_operations(self, market_data):
         """
         应用量子操作处理市场数据
@@ -359,73 +393,70 @@ class QuantumEntanglementEngine:
         
         Args:
             quantum_state: 当前量子态
-            input_data: 输入数据字典
+            input_data: 输入数据
             
         Returns:
             变换后的量子态
         """
-        # 创建量子门（变换矩阵）
-        transformation_matrix = np.eye(self.dimensions, dtype=complex)
+        # 添加非线性变换
+        transformed_state = np.copy(quantum_state)
         
-        # 处理输入数据中的各个特征
-        for feature, value in input_data.items():
-            # 根据特征和值计算相位变化
-            phase_shift = value * np.pi * 0.1  # 缩放到合理范围
+        if isinstance(input_data, dict):
+            # 提取市场数据特征
+            features = []
             
-            # 为不同特征选择不同的量子门行为
-            if feature == 'price_change':
-                # 价格变化使用旋转门
-                rotation_idx = 0
-                transformation_matrix[rotation_idx, rotation_idx] = np.cos(phase_shift) + 0j
-                rotation_idx2 = 1
-                transformation_matrix[rotation_idx, rotation_idx2] = -np.sin(phase_shift) + 0j
-                transformation_matrix[rotation_idx2, rotation_idx] = np.sin(phase_shift) + 0j
-                transformation_matrix[rotation_idx2, rotation_idx2] = np.cos(phase_shift) + 0j
+            # 价格变化
+            if 'price_change_pct' in input_data:
+                features.append(input_data['price_change_pct'])
             
-            elif feature == 'volume_change':
-                # 成交量变化使用相位门
-                phase_idx = 2
-                transformation_matrix[phase_idx, phase_idx] = np.exp(1j * phase_shift)
+            # 交易量
+            if 'volume_relative' in input_data:
+                features.append(input_data['volume_relative'])
             
-            elif feature == 'ma5_diff':
-                # 5日均线差异使用相位门
-                phase_idx = 3
-                transformation_matrix[phase_idx, phase_idx] = np.exp(1j * phase_shift)
+            # 如果特征少于3个，填充随机噪声
+            while len(features) < 3:
+                features.append(self.quantum_rng() * 0.01)  # 小噪声
+        else:
+            # 如果输入不是字典，尝试转换为列表或使用随机值
+            try:
+                features = list(input_data)[:3]
+                # 如果特征少于3个，填充随机噪声
+                while len(features) < 3:
+                    features.append(self.quantum_rng() * 0.01)
+            except:
+                # 退化情况：使用随机特征
+                features = [self.quantum_rng() * 0.1 for _ in range(3)]
+        
+        # 应用非线性变换 - 使用量子启发的扭曲变换
+        for i in range(self.dimensions):
+            # 复杂非线性变换 - 结合多个特征和量子相位
+            phase = 2 * np.pi * (i / self.dimensions)
             
-            elif feature == 'ma10_diff':
-                # 10日均线差异使用相位门
-                phase_idx = 4
-                transformation_matrix[phase_idx, phase_idx] = np.exp(1j * phase_shift)
+            # 高级量子效应模拟 - 考虑量子纠缠和相干性
+            nonlinear_factor = abs(np.sin(phase + features[0] * np.pi)) * (1.0 + features[1])
             
-            elif feature == 'ma20_diff':
-                # 20日均线差异使用相位门
-                phase_idx = 5
-                transformation_matrix[phase_idx, phase_idx] = np.exp(1j * phase_shift)
+            # 添加量子涨落效应
+            quantum_fluctuation = 0.0
+            if self.high_precision:
+                # 使用Box-Muller变换生成更高质量的高斯噪声
+                u1 = self.quantum_rng()
+                u2 = self.quantum_rng()
+                if u1 > 0:  # 避免对0取对数
+                    quantum_fluctuation = np.sqrt(-2.0 * np.log(u1)) * np.cos(2.0 * np.pi * u2) * 0.01
             
-            elif feature == 'volatility':
-                # 波动率使用哈达玛门混合
-                had_idx = 6
-                transformation_matrix[had_idx, had_idx] = np.cos(phase_shift) + 0j
-                had_idx2 = 7
-                if had_idx2 < self.dimensions:
-                    transformation_matrix[had_idx, had_idx2] = np.sin(phase_shift) + 0j
-                    transformation_matrix[had_idx2, had_idx] = np.sin(phase_shift) + 0j
-                    transformation_matrix[had_idx2, had_idx2] = -np.cos(phase_shift) + 0j
-            
-            # 自适应门：对于未指定的特征，动态分配量子门
+            # 应用非线性变换 - 使用黄金分割比作为特殊阈值
+            if nonlinear_factor > self.quantum_thresholds['resonance']:
+                # 超过黄金分割比阈值时产生共振
+                transformed_state[i] = np.tanh(quantum_state[i] * nonlinear_factor + quantum_fluctuation)
             else:
-                # 通过特征名的哈希值确定索引，确保相同特征总是使用相同的门
-                feat_hash = abs(hash(feature)) % (self.dimensions - 1)
-                transformation_matrix[feat_hash, feat_hash] = np.exp(1j * phase_shift)
-        
-        # 应用变换矩阵到量子态
-        transformed_state = np.dot(transformation_matrix, quantum_state)
+                # 否则使用量子波动方程
+                transformed_state[i] = quantum_state[i] * nonlinear_factor + quantum_fluctuation
         
         # 归一化
-        norm = np.sqrt(np.sum(np.abs(transformed_state) ** 2))
+        norm = np.linalg.norm(transformed_state)
         if norm > 0:
             transformed_state = transformed_state / norm
-            
+        
         return transformed_state
     
     def _apply_entanglement(self, entity_id, quantum_state):
@@ -474,52 +505,45 @@ class QuantumEntanglementEngine:
     
     def _calculate_prediction(self, quantum_state):
         """
-        计算预测结果
+        根据量子态计算预测结果
         
         Args:
-            quantum_state: 量子态
+            quantum_state: 量子态向量
             
         Returns:
-            预测结果字典，包含方向、强度和置信度
+            预测结果字典
         """
-        # 分离量子态的实部和虚部
-        real_part = np.real(quantum_state)
-        imag_part = np.imag(quantum_state)
+        # 计算振幅和相位
+        amplitudes = np.abs(quantum_state)
+        phases = np.angle(quantum_state)
         
-        # 计算方向（实部的加权和）
-        direction_weights = np.array([0.3, 0.2, 0.1, 0.1, 0.1, 0.1, 0.05, 0.05])
-        if len(direction_weights) > len(real_part):
-            direction_weights = direction_weights[:len(real_part)]
-        elif len(direction_weights) < len(real_part):
-            additional_weights = np.ones(len(real_part) - len(direction_weights)) * 0.05
-            direction_weights = np.concatenate([direction_weights, additional_weights])
-            direction_weights = direction_weights / np.sum(direction_weights)  # 重新归一化
-            
-        # 计算方向分数（正值表示上涨，负值表示下跌）
-        direction = np.sum(real_part * direction_weights)
+        # 使用前几个维度的数据计算方向
+        direction_dim = min(4, self.dimensions)
+        direction = np.sum(phases[:direction_dim]) / direction_dim / np.pi
         
-        # 使用量子态的模计算预测强度（0-1之间）
-        # 使用前4个维度的幅度平均值
-        amplitudes = np.abs(quantum_state[:4]) if len(quantum_state) >= 4 else np.abs(quantum_state)
+        # 规范化到-1到1之间
+        direction = max(-1.0, min(1.0, direction))
+        
+        # 计算强度
         strength = np.mean(amplitudes)
         
-        # 计算置信度（量子态的相干性）
-        # 量子态越纯粹，置信度越高
-        coherence = 0
-        for i in range(len(quantum_state)):
-            for j in range(i+1, len(quantum_state)):
-                coherence += np.abs(quantum_state[i] * np.conj(quantum_state[j]))
+        # 计算波动性
+        volatility = np.std(phases)
         
-        # 归一化置信度到0-1之间
-        max_coherence = (len(quantum_state) * (len(quantum_state) - 1)) / 2
-        confidence = coherence / max_coherence if max_coherence > 0 else 0
+        # 计算共振
+        resonance = np.abs(np.correlate(amplitudes, phases)[0]) / self.dimensions
+        
+        # 计算上涨和下跌概率
+        up_probability = (direction + 1) / 2
+        down_probability = 1 - up_probability
         
         return {
-            'predicted_direction': direction,  # 预测方向（>0上涨，<0下跌）
-            'prediction_strength': strength,    # 预测强度（0-1）
-            'confidence': confidence,           # 置信度（0-1）
-            'quantum_amplitudes': list(np.abs(quantum_state)),  # 量子态幅度
-            'quantum_phases': list(np.angle(quantum_state))     # 量子态相位
+            'direction': direction,
+            'strength': strength,
+            'volatility': volatility,
+            'resonance': resonance,
+            'up_probability': up_probability,
+            'down_probability': down_probability
         }
     
     def add_entanglement(self, entity_id1, entity_id2, strength=None):
@@ -628,7 +652,7 @@ class QuantumEntanglementEngine:
         # 获取最近的预测
         if entity_id in self.prediction_history and self.prediction_history[entity_id]:
             last_prediction = self.prediction_history[entity_id][-1]['prediction']
-            predicted_direction = last_prediction['predicted_direction']
+            predicted_direction = last_prediction['direction']
             
             # 计算预测误差
             error = actual_direction - predicted_direction

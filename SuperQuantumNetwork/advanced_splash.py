@@ -8,8 +8,8 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QLabel, QProgressBar, 
     QGraphicsDropShadowEffect, QHBoxLayout, QFrame
 )
-from PyQt5.QtCore import Qt, QTimer, QSize, pyqtSignal, QPropertyAnimation, QEasingCurve
-from PyQt5.QtGui import QFont, QColor, QIcon, QPixmap, QPainter, QLinearGradient, QPen, QBrush, QRadialGradient, QPointF
+from PyQt5.QtCore import Qt, QTimer, QSize, pyqtSignal, QPropertyAnimation, QEasingCurve, QPointF, QRectF
+from PyQt5.QtGui import QFont, QColor, QIcon, QPixmap, QPainter, QLinearGradient, QPen, QBrush, QRadialGradient
 import sys
 import random
 import math
@@ -307,7 +307,7 @@ class SuperGodSplashScreen(QWidget):
             
             painter.setBrush(QBrush(gradient))
             painter.setPen(Qt.NoPen)
-            painter.drawEllipse(QPointF(wave["x"], wave["y"]), wave["radius"], wave["radius"])
+            painter.drawEllipse(QRectF(wave["x"] - wave["radius"], wave["y"] - wave["radius"], wave["radius"] * 2, wave["radius"] * 2))
         
         # 绘制粒子
         for particle in self.particles:
@@ -318,35 +318,26 @@ class SuperGodSplashScreen(QWidget):
             
             # 绘制粒子
             particle_size = particle.display_size
-            painter.drawEllipse(int(particle.x - particle_size/2), 
+            painter.drawEllipse(QRectF(int(particle.x - particle_size/2), 
                                int(particle.y - particle_size/2), 
-                               int(particle_size), int(particle_size))
+                               int(particle_size), int(particle_size)))
             
-            # 绘制粒子连接线 (与最近的3个粒子)
-            painter.setPen(QPen(QColor(particle.color[0], 
-                                      particle.color[1], 
-                                      particle.color[2], 
-                                      100), 0.5))
-            
-            # 找到最近的3个粒子
-            distances = []
-            for other in self.particles:
-                if other != particle:
-                    distance = ((particle.x - other.x) ** 2 + (particle.y - other.y) ** 2) ** 0.5
-                    if distance < 100:  # 只连接距离小于100的粒子
-                        distances.append((distance, other))
-            
-            # 排序并连接最近的3个
-            distances.sort(key=lambda x: x[0])
-            for i, (distance, other) in enumerate(distances[:3]):
-                # 根据距离设置透明度
-                alpha = max(0, int(150 * (1 - distance / 100)))
-                painter.setPen(QPen(QColor(particle.color[0], 
-                                          particle.color[1], 
-                                          particle.color[2], 
-                                          alpha), 0.5))
-                painter.drawLine(int(particle.x), int(particle.y), 
-                                int(other.x), int(other.y))
+            # 绘制粒子连接线
+            for other_particle in self.nearest_particles(particle, 3):
+                # 根据距离计算线的透明度
+                distance = self._distance(particle, other_particle)
+                max_distance = 200
+                alpha = max(10, int(255 * (1 - distance / max_distance)))
+                
+                if alpha > 0:
+                    # 设置线的颜色和宽度
+                    pen = QPen(QColor(0, 150, 255, alpha))
+                    pen.setWidth(1)
+                    painter.setPen(pen)
+                    
+                    # 绘制连接线
+                    painter.drawLine(QPointF(int(particle.x), int(particle.y)),
+                                  QPointF(int(other_particle.x), int(other_particle.y)))
         
         # 绘制边缘发光效果
         rect = self.rect()
@@ -364,6 +355,23 @@ class SuperGodSplashScreen(QWidget):
         self.animation_timer.stop()
         self.wave_timer.stop()
         super().close()
+    
+    def nearest_particles(self, particle, count=3):
+        """查找最近的粒子"""
+        distances = []
+        for other in self.particles:
+            if other != particle:
+                distance = self._distance(particle, other)
+                if distance < 200:  # 只考虑距离小于200的粒子
+                    distances.append((distance, other))
+        
+        # 排序并返回最近的n个粒子
+        distances.sort(key=lambda x: x[0])
+        return [p for _, p in distances[:count]]
+    
+    def _distance(self, p1, p2):
+        """计算两个粒子之间的距离"""
+        return ((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2) ** 0.5
 
 def show_splash_screen(app):
     """显示启动画面并返回实例"""

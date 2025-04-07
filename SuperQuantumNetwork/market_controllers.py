@@ -540,6 +540,149 @@ class MarketDataController:
         return stocks
 
 
+class TradeController:
+    """交易控制器 - 处理交易执行和管理"""
+    
+    def __init__(self, market_controller=None, config=None):
+        """初始化交易控制器
+        
+        Args:
+            market_controller: 市场数据控制器实例
+            config: 配置字典
+        """
+        self.market_controller = market_controller
+        self.config = config or {}
+        self.positions = {}
+        self.orders = []
+        self.trading_enabled = False
+        self.trading_mode = "simulation"  # 默认为模拟交易
+        
+        logger.info("交易控制器初始化成功")
+    
+    def enable_trading(self, mode="simulation"):
+        """启用交易功能
+        
+        Args:
+            mode: 交易模式，可选 "simulation"(模拟) 或 "real"(实盘)
+        """
+        if mode not in ["simulation", "real"]:
+            logger.error(f"不支持的交易模式: {mode}")
+            return False
+        
+        self.trading_mode = mode
+        self.trading_enabled = True
+        logger.info(f"交易已启用，模式: {mode}")
+        return True
+    
+    def disable_trading(self):
+        """禁用交易功能"""
+        self.trading_enabled = False
+        logger.info("交易已禁用")
+        return True
+    
+    def place_order(self, symbol, direction, quantity, price_type="market", price=None):
+        """下单
+        
+        Args:
+            symbol: 股票代码
+            direction: 买卖方向，"buy" 或 "sell"
+            quantity: 数量
+            price_type: 价格类型，"market"(市价) 或 "limit"(限价)
+            price: 限价单价格
+            
+        Returns:
+            order_id: 订单ID
+        """
+        if not self.trading_enabled:
+            logger.warning("交易功能未启用，无法下单")
+            return None
+        
+        # 创建订单
+        order = {
+            "order_id": f"ORDER_{int(time.time())}_{len(self.orders)}",
+            "symbol": symbol,
+            "direction": direction,
+            "quantity": quantity,
+            "price_type": price_type,
+            "price": price,
+            "status": "submitted",
+            "create_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "update_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        
+        # 添加到订单列表
+        self.orders.append(order)
+        
+        # 如果是模拟交易，立即执行
+        if self.trading_mode == "simulation":
+            self._execute_simulation_order(order)
+        
+        logger.info(f"订单已提交: {order['order_id']}")
+        return order["order_id"]
+    
+    def _execute_simulation_order(self, order):
+        """执行模拟订单"""
+        # 更新订单状态
+        order["status"] = "filled"
+        order["update_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # 更新持仓
+        symbol = order["symbol"]
+        direction = order["direction"]
+        quantity = order["quantity"]
+        
+        if symbol not in self.positions:
+            self.positions[symbol] = {
+                "symbol": symbol,
+                "quantity": 0,
+                "cost": 0,
+                "current_price": 0
+            }
+        
+        if direction == "buy":
+            self.positions[symbol]["quantity"] += quantity
+        elif direction == "sell":
+            self.positions[symbol]["quantity"] -= quantity
+        
+        logger.info(f"模拟订单执行完成: {order['order_id']}")
+    
+    def get_positions(self):
+        """获取当前持仓"""
+        return self.positions
+    
+    def get_orders(self, status=None):
+        """获取订单列表
+        
+        Args:
+            status: 订单状态筛选
+            
+        Returns:
+            orders: 订单列表
+        """
+        if status:
+            return [order for order in self.orders if order["status"] == status]
+        return self.orders
+    
+    def cancel_order(self, order_id):
+        """取消订单
+        
+        Args:
+            order_id: 订单ID
+            
+        Returns:
+            success: 是否成功
+        """
+        for order in self.orders:
+            if order["order_id"] == order_id and order["status"] == "submitted":
+                order["status"] = "cancelled"
+                order["update_time"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                logger.info(f"订单已取消: {order_id}")
+                return True
+        
+        logger.warning(f"找不到可取消的订单: {order_id}")
+        return False
+
+
 # 单元测试
 if __name__ == "__main__":
     # 配置日志
