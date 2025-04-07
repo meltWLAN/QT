@@ -11,6 +11,7 @@ import traceback
 import time
 import importlib
 import threading
+import tempfile
 
 # 添加性能计时
 START_TIME = time.time()
@@ -97,10 +98,45 @@ def install_dependencies(packages):
         print(f"安装依赖失败: {str(e)}")
         return False
 
+# 检查是否已经有实例在运行
+def check_running_instance():
+    """检查是否已有实例在运行
+    
+    Returns:
+        bool: 如果已有实例在运行则返回True，否则返回False
+    """
+    lock_file_path = os.path.join(tempfile.gettempdir(), "super_god_desktop.lock")
+    
+    if os.path.exists(lock_file_path):
+        try:
+            # 读取锁文件中的进程ID
+            with open(lock_file_path, 'r') as f:
+                pid = int(f.read().strip())
+            
+            # 检查进程是否存在
+            try:
+                os.kill(pid, 0)
+                return True
+            except OSError:
+                # 进程不存在，可以删除旧的锁文件
+                os.remove(lock_file_path)
+        except (ValueError, IOError):
+            # 锁文件损坏，删除它
+            os.remove(lock_file_path)
+    
+    return False
 
 def main():
     """主函数"""
     try:
+        # 检查是否已有实例在运行
+        if check_running_instance():
+            print("=" * 60)
+            print(" 超神量子共生网络交易系统 - 已经在运行")
+            print(" 请不要重复启动")
+            print("=" * 60)
+            return 0
+            
         # 打印欢迎信息
         print("=" * 60)
         print(" 超神量子共生网络交易系统 - 豪华版桌面应用 v2.0.1")

@@ -24,6 +24,8 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QSize, QTimer, pyqtSignal, QThread, QPropertyAnimation, QEasingCurve, QObject, QPoint, QDateTime, QRect
 from PyQt5.QtGui import QIcon, QFont, QColor, QPixmap, QPainter, QBrush, QLinearGradient, QPen
 import threading
+import socket
+import tempfile
 
 # 配置日志
 logging.basicConfig(
@@ -2559,9 +2561,68 @@ def show_splash_screen():
         return splash
 
 
+# 添加单实例检查功能
+def is_already_running():
+    """检查程序是否已经在运行
+    
+    Returns:
+        bool: 如果程序已经在运行返回True，否则返回False
+    """
+    # 使用锁文件方式
+    lock_file_path = os.path.join(tempfile.gettempdir(), "super_god_desktop.lock")
+    
+    # 检查锁文件是否存在
+    if os.path.exists(lock_file_path):
+        try:
+            # 尝试读取锁文件中的进程ID
+            with open(lock_file_path, 'r') as f:
+                pid = int(f.read().strip())
+            
+            # 检查该进程是否还在运行
+            try:
+                # 在Unix系统中，如果进程存在，os.kill(pid, 0)不会发送信号但会做权限检查
+                os.kill(pid, 0)
+                # 如果执行到这里，进程仍在运行
+                return True
+            except OSError:
+                # 进程不存在，可以删除旧的锁文件
+                os.remove(lock_file_path)
+                # 继续创建新的锁文件
+        except (ValueError, IOError):
+            # 锁文件损坏，删除它
+            os.remove(lock_file_path)
+    
+    # 创建新的锁文件
+    try:
+        with open(lock_file_path, 'w') as f:
+            f.write(str(os.getpid()))
+        return False
+    except IOError:
+        logger.error("无法创建锁文件")
+        return False
+
+def cleanup_lock_file():
+    """清理锁文件"""
+    lock_file_path = os.path.join(tempfile.gettempdir(), "super_god_desktop.lock")
+    if os.path.exists(lock_file_path):
+        try:
+            os.remove(lock_file_path)
+        except OSError:
+            pass
+
 def main():
     """主函数"""
     try:
+        # 检查是否已有实例在运行
+        if is_already_running():
+            print("超神系统已经在运行中，请勿重复启动")
+            QMessageBox.warning(None, "重复启动", "超神系统已经在运行中，请勿重复启动")
+            return 0
+        
+        # 注册退出时清理锁文件
+        import atexit
+        atexit.register(cleanup_lock_file)
+        
         # 创建应用
         app = QApplication(sys.argv)
         app.setApplicationName("超神量子共生网络交易系统")

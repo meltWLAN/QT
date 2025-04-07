@@ -12,6 +12,7 @@ import logging
 import argparse
 from datetime import datetime
 import traceback
+import tempfile
 
 # 确保能够导入SuperQuantumNetwork包
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -27,6 +28,71 @@ except ImportError as e:
     print(f"导入错误: {e}")
     print("请确保已安装所需的依赖项: PyQt5, numpy, pandas")
     sys.exit(1)
+
+# 检查是否已经有实例在运行
+def check_running_instance():
+    """检查是否已有超神系统实例在运行
+    
+    Returns:
+        bool: 如果已有实例在运行则返回True，否则返回False
+    """
+    # 检查豪华版锁文件
+    lock_file_path = os.path.join(tempfile.gettempdir(), "super_god_desktop.lock")
+    
+    if os.path.exists(lock_file_path):
+        try:
+            # 读取锁文件中的进程ID
+            with open(lock_file_path, 'r') as f:
+                pid = int(f.read().strip())
+            
+            # 检查进程是否存在
+            try:
+                os.kill(pid, 0)
+                return True
+            except OSError:
+                # 进程不存在，可以忽略
+                pass
+        except (ValueError, IOError):
+            # 锁文件损坏，忽略
+            pass
+    
+    # 检查基础版锁文件
+    lock_file_path = os.path.join(tempfile.gettempdir(), "supergod_basic.lock")
+    
+    if os.path.exists(lock_file_path):
+        try:
+            # 读取锁文件中的进程ID
+            with open(lock_file_path, 'r') as f:
+                pid = int(f.read().strip())
+            
+            # 检查进程是否存在
+            try:
+                os.kill(pid, 0)
+                return True
+            except OSError:
+                # 进程不存在，可以删除旧的锁文件
+                os.remove(lock_file_path)
+        except (ValueError, IOError):
+            # 锁文件损坏，删除它
+            os.remove(lock_file_path)
+    
+    # 创建锁文件
+    try:
+        with open(lock_file_path, 'w') as f:
+            f.write(str(os.getpid()))
+    except IOError:
+        print("警告: 无法创建锁文件")
+    
+    return False
+
+def cleanup_lock_file():
+    """退出时清理锁文件"""
+    lock_file_path = os.path.join(tempfile.gettempdir(), "supergod_basic.lock")
+    if os.path.exists(lock_file_path):
+        try:
+            os.remove(lock_file_path)
+        except OSError:
+            pass
 
 def parse_arguments():
     """解析命令行参数"""
@@ -141,6 +207,16 @@ def show_splash_screen():
 
 def main():
     """主函数"""
+    # 检查是否已有实例在运行
+    if check_running_instance():
+        print("\n超神系统已经在运行中，请勿重复启动！\n")
+        QMessageBox.warning(None, "重复启动", "超神系统已经在运行中，请勿重复启动！")
+        return 1
+    
+    # 注册退出时清理锁文件
+    import atexit
+    atexit.register(cleanup_lock_file)
+    
     # 打印横幅
     print_banner()
     

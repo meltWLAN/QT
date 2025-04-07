@@ -296,9 +296,10 @@ class QuantumEntanglementEngine:
         # 查找与该实体有纠缠关系的其他实体
         entangled_entities = []
         
-        for (e1, e2) in self.entanglement_matrix:
-            if e1 == entity and e2 in market_data:
-                entangled_entities.append(e2)
+        if entity in self.entanglement_matrix:
+            for e2 in self.entanglement_matrix[entity]:
+                if e2 in market_data:
+                    entangled_entities.append(e2)
         
         if not entangled_entities:
             return 0.0
@@ -309,7 +310,7 @@ class QuantumEntanglementEngine:
         for e2 in entangled_entities:
             if e2 in self.quantum_states:
                 # 获取纠缠关系
-                entanglement = self.entanglement_matrix.get((entity, e2))
+                entanglement = self.entanglement_matrix[entity][e2]
                 if entanglement:
                     # 计算量子态相干性
                     coherence = self._compute_quantum_coherence(
@@ -1569,4 +1570,4 @@ class QuantumEntanglementEngine:
             'amplitude': amplitude,
             'variance': variance,
             'stability': 1.0 - min(1.0, variance * 5)
-        } 
+        }
