@@ -76,6 +76,9 @@ class MarketDataController:
         # 延迟初始化标志
         self._ai_engine_initialized = False
         
+        # 量子引擎引用 - 初始为None，通过set_quantum_engine设置
+        self.quantum_engine = None
+        
         # 初始化AI引擎 - 仅在明确请求时加载
         if self.use_ai:
             # 使用后台线程初始化AI引擎，避免阻塞UI
@@ -95,6 +98,21 @@ class MarketDataController:
                 if not os.path.exists(self.data_dir):
                     os.makedirs(self.data_dir)
     
+    def set_quantum_engine(self, quantum_engine):
+        """设置量子引擎实例，用于进行高级纠缠预测
+        
+        Args:
+            quantum_engine: 量子引擎实例
+        """
+        self.quantum_engine = quantum_engine
+        logger.info("市场数据控制器成功关联量子引擎")
+        
+        # 如果AI引擎已初始化，也为其设置量子引擎
+        if hasattr(self, 'ai_engine') and self.ai_engine is not None:
+            if hasattr(self.ai_engine, 'set_quantum_engine'):
+                self.ai_engine.set_quantum_engine(quantum_engine)
+                logger.info("AI引擎成功关联量子引擎")
+
     def _initialize_ai_engine(self):
         """延迟初始化AI引擎"""
         if not self._ai_engine_initialized and HAS_QUANTUM_AI:
@@ -355,58 +373,189 @@ class MarketDataController:
             logger.error(f"加载文件失败: {file_path} - {str(e)}")
             return None
         
-    def predict_market_trend(self):
-        """预测市场趋势"""
+    def predict_market_trend(self, use_quantum=True):
+        """预测市场趋势
+        
+        Args:
+            use_quantum: 是否使用量子引擎增强预测
+        
+        Returns:
+            预测结果字典
+        """
         logger.info("开始市场趋势预测...")
         
-        with self.data_lock:
-            try:
-                # 如果启用AI但尚未初始化，则现在初始化
-                if self.use_ai and not self._ai_engine_initialized:
-                    self._initialize_ai_engine()
-                
-                # 检查缓存，避免短时间内重复预测
-                cache_key = 'market_prediction'
-                current_time = time.time()
-                cache_valid = (
-                    cache_key in self._memory_cache and 
-                    current_time < self._memory_cache_ttl.get(cache_key, 0)
-                )
-                
-                if cache_valid:
-                    logger.info("使用缓存的市场预测结果")
-                    return self._memory_cache[cache_key]
-                
-                # 生成预测
-                if self.use_ai and self._ai_engine_initialized:
-                    # 使用AI进行预测
-                    prediction = self.ai_engine.predict_market(self.market_data)
-                    logger.info("使用量子AI完成市场预测")
-                else:
-                    # 使用基本分析
-                    prediction = self._basic_market_analysis()
-                    logger.info("使用基本分析完成市场预测")
-                
-                # 保存预测结果
-                self._save_prediction(prediction)
-                
-                # 更新预测缓存
-                self._memory_cache[cache_key] = prediction
-                self._memory_cache_ttl[cache_key] = current_time + 300  # 缓存5分钟
-                
-                # 更新最新预测
-                self.latest_prediction.update(prediction)
-                
-                logger.info("市场趋势预测完成")
-                return prediction
-            except Exception as e:
-                logger.error(f"预测市场趋势失败: {str(e)}")
-                logger.error(traceback.format_exc())
-                
-                # 返回一个基本预测结果，避免UI崩溃
-                return self._basic_market_analysis()
+        try:
+            # 确保市场数据是最新的
+            if not self.market_data:
+                self.update_market_data()
+            
+            prediction_result = {}
+            
+            # 如果启用AI并且AI引擎已初始化，使用AI预测
+            if self.use_ai and self._ai_engine_initialized:
+                prediction_result = self.ai_engine.predict_market(self.market_data)
+                logger.info("使用AI引擎完成市场预测")
+            else:
+                # 使用基本分析进行预测
+                prediction_result = self._basic_market_prediction()
+                logger.info("使用基本分析完成市场预测")
+            
+            # 如果启用量子引擎并且量子引擎可用，增强预测
+            if use_quantum and self.quantum_engine is not None:
+                prediction_result = self._enhance_prediction_with_quantum(prediction_result)
+                logger.info("使用量子引擎增强市场预测")
+            
+            # 保存预测结果
+            self.latest_prediction = prediction_result
+            
+            # 保存预测结果到文件
+            self._save_prediction(prediction_result)
+            
+            logger.info("市场趋势预测完成")
+            return prediction_result
+        except Exception as e:
+            logger.error(f"市场趋势预测失败: {str(e)}")
+            logger.error(traceback.format_exc())
+            
+            # 返回基本预测
+            return {
+                'status': 'error',
+                'message': str(e),
+                'risk_level': 0.5,
+                'market_trend': '未知',
+                'prediction_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'is_quantum_enhanced': False
+            }
     
-    def _basic_market_analysis(self):
+    def _enhance_prediction_with_quantum(self, basic_prediction):
+        """使用量子引擎增强预测结果
+        
+        Args:
+            basic_prediction: 基本预测结果
+        
+        Returns:
+            增强后的预测结果
+        """
+        try:
+            # 从基本预测中获取关键指标
+            risk_level = basic_prediction.get('risk_level', 0.5)
+            market_trend = basic_prediction.get('market_trend', '未知')
+            
+            # 准备市场实体
+            market_entities = ['000001.SH', '399001.SZ', '399006.SZ']
+            
+            # 如果量子引擎有market_resonance方法，使用它计算市场共振
+            if hasattr(self.quantum_engine, 'calculate_market_resonance'):
+                resonance = self.quantum_engine.calculate_market_resonance(market_entities)
+                logger.info(f"量子市场共振系数: {resonance:.4f}")
+                
+                # 修改风险评估
+                quantum_risk_adjustment = (resonance - 0.5) * 0.3  # 量子调整因子
+                risk_level = max(0.1, min(0.9, risk_level - quantum_risk_adjustment))
+                
+                # 如果量子引擎有predict_future方法，使用它进行前瞻性预测
+                if hasattr(self.quantum_engine, 'predict_future'):
+                    future_states = self.quantum_engine.predict_future(
+                        market_entities, 
+                        steps=5,
+                        current_state=self.market_data
+                    )
+                    
+                    # 分析未来状态
+                    if future_states and len(future_states) > 0:
+                        future_trends = []
+                        for state in future_states:
+                            if isinstance(state, dict) and 'trend' in state:
+                                future_trends.append(state['trend'])
+                        
+                        # 如果有未来趋势数据，使用它们调整市场趋势预测
+                        if future_trends:
+                            # 计算未来趋势的加权平均（近期权重高）
+                            weights = [0.4, 0.3, 0.15, 0.1, 0.05][:len(future_trends)]
+                            norm_weights = [w/sum(weights) for w in weights]
+                            
+                            avg_future_trend = sum(t * w for t, w in zip(future_trends, norm_weights))
+                            
+                            # 根据未来趋势调整市场趋势预测
+                            trend_map = {
+                                '强势上涨': 2,
+                                '温和上涨': 1,
+                                '横盘震荡': 0,
+                                '温和下跌': -1,
+                                '强势下跌': -2
+                            }
+                            
+                            # 当前趋势的数值表示
+                            current_trend_value = trend_map.get(market_trend, 0)
+                            
+                            # 融合当前趋势和未来趋势（70%当前，30%未来）
+                            combined_trend_value = current_trend_value * 0.7 + avg_future_trend * 0.3
+                            
+                            # 映射回趋势描述
+                            reverse_trend_map = {v: k for k, v in trend_map.items()}
+                            # 找到最接近的趋势值
+                            closest_trend = min(reverse_trend_map.keys(), key=lambda x: abs(x - combined_trend_value))
+                            market_trend = reverse_trend_map[closest_trend]
+            
+            # 创建增强的预测结果
+            enhanced_prediction = basic_prediction.copy()
+            enhanced_prediction.update({
+                'risk_level': risk_level,
+                'market_trend': market_trend,
+                'is_quantum_enhanced': True,
+                'quantum_enhancement_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            })
+            
+            # 如果基本预测包含详细预测，调整它们
+            if 'detailed_predictions' in basic_prediction:
+                detailed = basic_prediction['detailed_predictions']
+                
+                # 遍历并调整每个详细预测
+                for entity, pred in detailed.items():
+                    if isinstance(pred, dict) and 'prediction' in pred:
+                        # 应用量子调整
+                        quantum_factor = self._calculate_quantum_factor(entity)
+                        pred['prediction'] = pred['prediction'] * (1 + quantum_factor * 0.2)
+                        pred['is_quantum_enhanced'] = True
+                
+                enhanced_prediction['detailed_predictions'] = detailed
+            
+            return enhanced_prediction
+        except Exception as e:
+            logger.error(f"量子增强预测失败: {str(e)}")
+            logger.error(traceback.format_exc())
+            # 返回原始预测
+            return basic_prediction
+    
+    def _calculate_quantum_factor(self, entity):
+        """计算特定实体的量子因子
+        
+        Args:
+            entity: 市场实体标识符
+        
+        Returns:
+            量子因子 (-0.2 to 0.2)
+        """
+        try:
+            if self.quantum_engine is None:
+                return 0.0
+                
+            # 如果量子引擎有get_entity_phase方法，使用它
+            if hasattr(self.quantum_engine, 'get_entity_phase'):
+                phase = self.quantum_engine.get_entity_phase(entity)
+                return 0.2 * np.sin(phase)
+            
+            # 如果量子引擎有get_quantum_state方法，使用它
+            elif hasattr(self.quantum_engine, 'get_quantum_state'):
+                state = self.quantum_engine.get_quantum_state(entity)
+                if isinstance(state, dict) and 'phase' in state:
+                    return 0.2 * np.sin(state['phase'])
+            
+            return 0.0
+        except Exception:
+            return 0.0
+    
+    def _basic_market_prediction(self):
         """基本市场分析 (当AI不可用时)"""
         # 注意：这只是一个简化的市场分析示例
         

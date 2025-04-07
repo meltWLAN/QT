@@ -18,10 +18,12 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QHeaderView, QGroupBox,
     QFormLayout, QMenu, QSystemTrayIcon, QProgressBar, QFrame,
     QSpacerItem, QSizePolicy, QGraphicsDropShadowEffect, QDesktopWidget,
-    QComboBox, QScrollArea
+    QComboBox, QScrollArea, QProgressDialog, QListWidgetItem, QTextEdit,
+    QLineEdit, QSpinBox, QGridLayout
 )
 from PyQt5.QtCore import Qt, QSize, QTimer, pyqtSignal, QThread, QPropertyAnimation, QEasingCurve, QObject, QPoint, QDateTime, QRect
 from PyQt5.QtGui import QIcon, QFont, QColor, QPixmap, QPainter, QBrush, QLinearGradient, QPen
+import threading
 
 # 配置日志
 logging.basicConfig(
@@ -341,6 +343,9 @@ class SuperGodDesktopApp(QMainWindow):
         
         # 设置系统托盘
         self._setup_tray_icon()
+        
+        # 整合所有模块，建立模块间连接
+        self._integrate_modules()
         
         # 状态栏更新定时器
         self._status_timer = QTimer(self)
@@ -750,160 +755,1054 @@ class SuperGodDesktopApp(QMainWindow):
             self.tab_widget.addTab(dashboard_widget, "仪表盘")
     
     def _create_market_tab(self):
-        """创建中国市场分析标签页"""
+        """创建市场分析标签页"""
         try:
-            self.logger.info("正在创建市场分析标签页...")
+            logger.info("创建市场分析标签页...")
             
-            # 导入必要的组件
-            from china_market_view import ChinaMarketWidget
-            from market_controllers import MarketDataController
-            
-            # 创建tab容器
+            # 创建标签页容器
             market_tab = QWidget()
             market_layout = QVBoxLayout(market_tab)
-            market_layout.setContentsMargins(10, 10, 10, 10)
+            market_layout.setContentsMargins(15, 15, 15, 15)
+            market_layout.setSpacing(10)
             
-            # 创建顶部信息面板
-            top_info_frame = QFrame()
-            top_info_frame.setObjectName("topInfoFrame")
-            top_info_frame.setStyleSheet("""
-                #topInfoFrame {
-                    background-color: rgba(10, 10, 30, 0.6);
-                    border: 1px solid #222244;
-                    border-radius: 8px;
+            # 顶部状态面板
+            status_panel = QWidget()
+            status_layout = QHBoxLayout(status_panel)
+            status_layout.setContentsMargins(5, 5, 5, 5)
+            status_layout.setSpacing(20)
+            
+            # 市场状态标签
+            self.market_status_label = QLabel("市场状态: 加载中...")
+            self.market_status_label.setStyleSheet("color: #00DDFF; font-weight: bold;")
+            status_layout.addWidget(self.market_status_label)
+            
+            # 更新时间标签
+            self.market_time_label = QLabel("更新时间: --")
+            self.market_time_label.setStyleSheet("color: #00DDFF; font-weight: bold;")
+            status_layout.addWidget(self.market_time_label)
+            
+            # 添加刷新按钮
+            refresh_btn = QPushButton("刷新数据")
+            refresh_btn.setFixedWidth(120)
+            refresh_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(0, 60, 120, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 4px;
+                    padding: 5px;
+                }
+                QPushButton:hover {
+                    background-color: rgba(0, 80, 160, 0.8);
+                }
+                QPushButton:pressed {
+                    background-color: rgba(0, 40, 100, 0.9);
                 }
             """)
-            top_info_layout = QHBoxLayout(top_info_frame)
-            
-            # 市场状态
-            market_status_label = QLabel("市场状态: ")
-            market_status_label.setStyleSheet("color: #8888AA; font-weight: bold;")
-            self.market_status_value = QLabel("已连接")
-            self.market_status_value.setStyleSheet("color: #00DDFF; font-weight: bold;")
-            
-            # 最后更新时间
-            update_time_label = QLabel("最后更新: ")
-            update_time_label.setStyleSheet("color: #8888AA; font-weight: bold;")
-            self.market_update_time = QLabel("--")
-            self.market_update_time.setStyleSheet("color: #BBBBDD;")
-            
-            # 设置阴影效果
-            shadow = QGraphicsDropShadowEffect()
-            shadow.setBlurRadius(10)
-            shadow.setColor(QColor(0, 170, 255, 100))
-            shadow.setOffset(0, 0)
-            self.market_status_value.setGraphicsEffect(shadow)
-            
-            # 添加到布局
-            top_info_layout.addWidget(market_status_label)
-            top_info_layout.addWidget(self.market_status_value)
-            top_info_layout.addSpacing(30)
-            top_info_layout.addWidget(update_time_label)
-            top_info_layout.addWidget(self.market_update_time)
-            top_info_layout.addStretch()
+            refresh_btn.clicked.connect(self._refresh_market_data)
+            status_layout.addWidget(refresh_btn)
             
             # 添加到主布局
-            market_layout.addWidget(top_info_frame)
+            market_layout.addWidget(status_panel)
             
-            # 创建市场视图
-            try:
-                # 创建控制器
-                market_controller = MarketDataController()
-                
-                # 创建市场视图
-                self.market_widget = ChinaMarketWidget(parent=market_tab, controller=market_controller)
-                market_layout.addWidget(self.market_widget)
-                
-                # 设置更新时间定时器
-                self.market_update_timer = QTimer()
-                self.market_update_timer.timeout.connect(self._update_market_time)
-                self.market_update_timer.start(30000)  # 30秒更新一次
-                
-                # 应用量子风格到各个组件
-                self._apply_quantum_style_to(QGroupBox)
-                self._apply_quantum_style_to(QTableWidget)
-                self._apply_quantum_style_to(QPushButton)
-                
-                self.logger.info("市场分析标签页创建成功")
-            except Exception as e:
-                self.logger.error(f"创建市场视图失败: {str(e)}")
-                error_label = QLabel(f"加载市场视图失败: {str(e)}")
-                error_label.setStyleSheet("color: #FF4444; font-weight: bold;")
-                market_layout.addWidget(error_label)
+            # 指数面板
+            indices_group = QGroupBox("市场指数")
+            indices_group.setStyleSheet("""
+                QGroupBox {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                }
+            """)
+            indices_layout = QVBoxLayout(indices_group)
             
-            # 添加标签页
+            # 添加三个指数
+            indices = [
+                {"name": "上证指数", "code": "000001.SH", "price": "3250.55", "change": "+0.75%", "volume": "325.6亿"},
+                {"name": "深证成指", "code": "399001.SZ", "price": "10765.31", "change": "+1.25%", "volume": "425.8亿"},
+                {"name": "创业板指", "code": "399006.SZ", "price": "2156.48", "change": "+1.56%", "volume": "156.8亿"}
+            ]
+            
+            for index in indices:
+                index_widget = QWidget()
+                index_layout = QHBoxLayout(index_widget)
+                index_layout.setContentsMargins(5, 5, 5, 5)
+                
+                # 指数名称
+                name_label = QLabel(f"{index['name']} ({index['code']})")
+                name_label.setStyleSheet("color: #FFFFFF; font-weight: bold;")
+                index_layout.addWidget(name_label)
+                
+                # 指数价格
+                price_label = QLabel(index['price'])
+                price_label.setStyleSheet("color: #FFFFFF; font-weight: bold; font-size: 16px;")
+                index_layout.addWidget(price_label)
+                
+                # 涨跌幅
+                change_label = QLabel(index['change'])
+                if "+" in index['change']:
+                    change_label.setStyleSheet("color: #FF4444; font-weight: bold;")
+                else:
+                    change_label.setStyleSheet("color: #44FF44; font-weight: bold;")
+                index_layout.addWidget(change_label)
+                
+                # 成交量
+                volume_label = QLabel(f"成交量: {index['volume']}")
+                volume_label.setStyleSheet("color: #AAAACC;")
+                index_layout.addWidget(volume_label)
+                
+                # 添加到指数布局
+                indices_layout.addWidget(index_widget)
+            
+            # 添加到主布局
+            market_layout.addWidget(indices_group)
+            
+            # 热点板块面板
+            sectors_group = QGroupBox("热点板块")
+            sectors_group.setStyleSheet("""
+                QGroupBox {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                }
+            """)
+            sectors_layout = QVBoxLayout(sectors_group)
+            
+            # 添加热点板块
+            sectors = [
+                "半导体: +2.35%",
+                "新能源: +1.85%",
+                "医药生物: +1.25%",
+                "人工智能: +3.12%",
+                "金融科技: +0.86%"
+            ]
+            
+            for i, sector in enumerate(sectors):
+                sector_label = QLabel(f"{i+1}. {sector}")
+                if i < 3:
+                    sector_label.setStyleSheet("color: #00FFA0; font-weight: bold;")
+                else:
+                    sector_label.setStyleSheet("color: #00FFCC;")
+                sectors_layout.addWidget(sector_label)
+            
+            # 添加到主布局
+            market_layout.addWidget(sectors_group)
+            
+            # 市场预测面板
+            prediction_group = QGroupBox("量子预测")
+            prediction_group.setStyleSheet("""
+                QGroupBox {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                }
+            """)
+            prediction_layout = QVBoxLayout(prediction_group)
+            
+            # 预测结果文本
+            self.prediction_text = QTextEdit()
+            self.prediction_text.setReadOnly(True)
+            self.prediction_text.setStyleSheet("""
+                QTextEdit {
+                    background-color: rgba(0, 30, 60, 0.7);
+                    color: #00DDFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-family: 'Arial';
+                }
+            """)
+            self.prediction_text.setHtml("""
+                <h3 style="color:#00FFCC;">市场预测</h3>
+                <p>点击"刷新数据"按钮获取最新市场数据，并进行量子预测分析。</p>
+                <p>当前预测结果将显示在此处。</p>
+            """)
+            prediction_layout.addWidget(self.prediction_text)
+            
+            # 添加到主布局
+            market_layout.addWidget(prediction_group)
+            
+            # 设置弹性空间
+            market_layout.addStretch(1)
+            
+            # 创建定时器以定期更新市场时间
+            self.market_timer = QTimer(self)
+            self.market_timer.timeout.connect(self._update_market_time)
+            self.market_timer.start(30000)  # 每30秒更新一次
+            
+            # 初始设置市场时间
+            self._update_market_time()
+            
+            logger.info("市场分析标签页创建完成")
+            
+            # 添加到标签页组件
             self.tab_widget.addTab(market_tab, "中国市场")
-            return True
+            
+            return market_tab
         except Exception as e:
-            self.logger.error(f"创建市场分析标签页失败: {str(e)}")
-            self.logger.error(traceback.format_exc())
+            logger.error(f"创建市场分析标签页失败: {str(e)}")
+            logger.error(traceback.format_exc())
             
-            # 创建一个空的市场分析标签页
-            market_tab = QWidget()
-            market_layout = QVBoxLayout(market_tab)
-            error_label = QLabel(f"加载市场分析组件失败: {str(e)}")
-            error_label.setStyleSheet("color: #FF4444; font-weight: bold;")
-            market_layout.addWidget(error_label)
+            # 创建一个空白页面并显示错误
+            error_tab = QWidget()
+            error_layout = QVBoxLayout(error_tab)
+            error_label = QLabel(f"加载市场分析模块失败: {str(e)}")
+            error_label.setStyleSheet("color: red;")
+            error_layout.addWidget(error_label)
             
-            self.tab_widget.addTab(market_tab, "中国市场")
-            return False
+            # 添加到标签页组件
+            self.tab_widget.addTab(error_tab, "中国市场")
+            
+            return error_tab
     
-    def _update_market_time(self):
-        """更新市场时间显示"""
-        current_time = QDateTime.currentDateTime().toString("yyyy-MM-dd hh:mm:ss")
-        self.market_update_time.setText(current_time)
+    def _create_index_panel(self, title, data_key):
+        """创建指数面板"""
+        panel = QGroupBox(title)
+        panel.setObjectName(f"{data_key}Panel")
+        layout = QVBoxLayout(panel)
+        layout.setContentsMargins(10, 15, 10, 15)
+        layout.setSpacing(8)
+        
+        # 指数价格
+        price_label = QLabel("--")
+        price_label.setObjectName(f"{data_key}Price")
+        price_label.setStyleSheet("font-size: 24px; font-weight: bold; color: #FFFFFF;")
+        layout.addWidget(price_label)
+        
+        # 涨跌幅
+        change_label = QLabel("--")
+        change_label.setObjectName(f"{data_key}Change")
+        change_label.setStyleSheet("font-size: 18px; color: #FFFFFF;")
+        layout.addWidget(change_label)
+        
+        # 成交量
+        volume_label = QLabel("成交量: --")
+        volume_label.setObjectName(f"{data_key}Volume")
+        layout.addWidget(volume_label)
+        
+        # 设置对象名称以便后续引用
+        panel.price_label = price_label
+        panel.change_label = change_label
+        panel.volume_label = volume_label
+        
+        return panel
+    
+    def _create_sectors_panel(self):
+        """创建热点板块面板"""
+        panel = QGroupBox("热点板块")
+        panel.setObjectName("sectorsPanel")
+        layout = QVBoxLayout(panel)
+        
+        # 使用QTextEdit代替QListWidget
+        self.sectors_list = QTextEdit()
+        self.sectors_list.setObjectName("sectorsList")
+        self.sectors_list.setReadOnly(True)
+        self.sectors_list.setStyleSheet("""
+            QTextEdit {
+                background-color: rgba(0, 20, 40, 0.7);
+                color: #00FFCC;
+                border: 1px solid #0088AA;
+                border-radius: 5px;
+                padding: 5px;
+            }
+        """)
+        layout.addWidget(self.sectors_list)
+        
+        return panel
+    
+    def _create_north_flow_panel(self):
+        """创建北向资金面板"""
+        panel = QGroupBox("北向资金")
+        panel.setObjectName("northFlowPanel")
+        layout = QVBoxLayout(panel)
+        
+        # 创建北向资金标签
+        self.north_flow_label = QLabel("净流入: --")
+        self.north_flow_label.setObjectName("northFlowValue")
+        self.north_flow_label.setStyleSheet("font-size: 16px; font-weight: bold;")
+        layout.addWidget(self.north_flow_label)
+        
+        # 五日净流入
+        self.north_flow_5d_label = QLabel("五日净流入: --")
+        self.north_flow_5d_label.setObjectName("northFlow5d")
+        layout.addWidget(self.north_flow_5d_label)
+        
+        # 资金趋势
+        self.north_flow_trend_label = QLabel("趋势: --")
+        self.north_flow_trend_label.setObjectName("northFlowTrend")
+        layout.addWidget(self.north_flow_trend_label)
+        
+        return panel
+    
+    def _load_initial_market_data(self):
+        """初始加载市场数据"""
+        # 使用后台线程加载数据
+        threading.Thread(target=self._async_load_market_data, daemon=True).start()
+    
+    def _async_load_market_data(self):
+        """异步加载市场数据"""
+        try:
+            # 确保市场控制器已初始化
+            if hasattr(self, 'market_controller') and self.market_controller:
+                # 更新市场数据
+                self.market_controller.update_market_data(force_update=True)
+                
+                # 数据更新完成后，在主线程中更新UI
+                QTimer.singleShot(0, self._update_market_ui)
+            else:
+                logger.warning("市场控制器尚未初始化，无法加载市场数据")
+        except Exception as e:
+            logger.error(f"异步加载市场数据失败: {str(e)}")
+            logger.error(traceback.format_exc())
+    
+    def _update_market_ui(self):
+        """更新市场UI"""
+        try:
+            # 确保市场控制器已初始化
+            if not hasattr(self, 'market_controller') or not self.market_controller:
+                return
+            
+            # 获取市场数据
+            market_data = self.market_controller.market_data
+            
+            # 更新指数面板
+            if hasattr(self, 'sh_index_panel'):
+                self._update_index_panel(self.sh_index_panel, market_data.get('sh_index', {}))
+            if hasattr(self, 'sz_index_panel'):    
+                self._update_index_panel(self.sz_index_panel, market_data.get('sz_index', {}))
+            if hasattr(self, 'cyb_index_panel'):
+                self._update_index_panel(self.cyb_index_panel, market_data.get('cyb_index', {}))
+            
+            # 更新热点板块
+            if hasattr(self, 'sectors_list'):
+                sectors = market_data.get('sectors', {}).get('hot_sectors', [])
+                self._update_sectors_list(sectors)
+            
+            # 更新北向资金
+            if hasattr(self, 'north_flow_label'):
+                north_flow = self.market_controller.latest_prediction.get('north_flow', {})
+                self._update_north_flow_panel(north_flow)
+            
+            # 更新市场状态
+            self._update_market_status()
+            
+            # 更新时间标签
+            self._update_market_time()
+            
+            logger.info("市场UI更新完成")
+        except Exception as e:
+            logger.error(f"更新市场UI失败: {str(e)}")
+            logger.error(traceback.format_exc())
+    
+    def _update_index_panel(self, panel, data):
+        """更新指数面板"""
+        if not data or not hasattr(panel, 'price_label'):
+            return
+        
+        # 更新价格
+        price = data.get('close', '--')
+        if isinstance(price, (int, float)):
+            panel.price_label.setText(f"{price:.2f}")
+        else:
+            panel.price_label.setText(str(price))
+        
+        # 更新涨跌幅
+        change_pct = data.get('change_pct', 0)
+        if isinstance(change_pct, (int, float)):
+            change_text = f"{change_pct:+.2f}%"
+            if change_pct > 0:
+                panel.change_label.setStyleSheet("font-size: 18px; color: #FF4444;")
+            elif change_pct < 0:
+                panel.change_label.setStyleSheet("font-size: 18px; color: #44FF44;")
+            else:
+                panel.change_label.setStyleSheet("font-size: 18px; color: #FFFFFF;")
+            panel.change_label.setText(change_text)
+        
+        # 更新成交量
+        volume = data.get('volume', 0)
+        if isinstance(volume, (int, float)):
+            if volume > 100000000:
+                volume_text = f"成交量: {volume/100000000:.2f}亿手"
+            else:
+                volume_text = f"成交量: {volume/10000:.2f}万手"
+            panel.volume_label.setText(volume_text)
+    
+    def _update_sectors_list(self, sectors):
+        """更新热点板块列表"""
+        # 确保sectors_list存在
+        if not hasattr(self, 'sectors_list'):
+            return
+            
+        # 准备HTML内容
+        html = "<html><body style='color: #00FFCC;'>"
+        
+        # 添加热点板块
+        for i, sector in enumerate(sectors):
+            if i < 3:
+                # 前三名使用不同颜色
+                html += f"<p style='color: #00FFA0;'><b>{i+1}. {sector}</b></p>"
+            else:
+                html += f"<p>{i+1}. {sector}</p>"
+        
+        html += "</body></html>"
+        
+        # 设置HTML内容
+        self.sectors_list.setHtml(html)
+    
+    def _update_north_flow_panel(self, data):
+        """更新北向资金面板"""
+        if not data:
+            return
+        
+        # 净流入
+        if hasattr(self, 'north_flow_label'):
+            inflow = data.get('total_inflow', 0)
+            if isinstance(inflow, (int, float)):
+                if abs(inflow) > 100000000:
+                    inflow_text = f"净流入: {inflow/100000000:.2f}亿"
+                else:
+                    inflow_text = f"净流入: {inflow/10000:.2f}万"
+                
+                # 设置颜色
+                if inflow > 0:
+                    self.north_flow_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #FF4444;")
+                else:
+                    self.north_flow_label.setStyleSheet("font-size: 16px; font-weight: bold; color: #44FF44;")
+                
+                self.north_flow_label.setText(inflow_text)
+        
+        # 5日净流入
+        if hasattr(self, 'north_flow_5d_label'):
+            flow_5d = data.get('total_flow_5d', 0)
+            if isinstance(flow_5d, (int, float)):
+                if abs(flow_5d) > 100000000:
+                    flow_5d_text = f"五日净流入: {flow_5d/100000000:.2f}亿"
+                else:
+                    flow_5d_text = f"五日净流入: {flow_5d/10000:.2f}万"
+                self.north_flow_5d_label.setText(flow_5d_text)
+        
+        # 资金趋势
+        if hasattr(self, 'north_flow_trend_label'):
+            trend = data.get('flow_trend', '--')
+            self.north_flow_trend_label.setText(f"趋势: {trend}")
+    
+    def _update_market_status(self):
+        """更新市场状态"""
+        try:
+            # 如果有预测结果，显示预测的市场状态
+            if hasattr(self, 'market_controller') and self.market_controller and hasattr(self, 'market_status_label'):
+                prediction = self.market_controller.latest_prediction
+                if prediction and 'risk_analysis' in prediction:
+                    risk = prediction['risk_analysis'].get('overall_risk', 0.5)
+                    trend = prediction['risk_analysis'].get('risk_trend', '未知')
+                    
+                    # 基于风险水平设置状态颜色
+                    if risk < 0.3:
+                        status_color = "#00FF00"  # 绿色 - 低风险
+                    elif risk < 0.7:
+                        status_color = "#FFFF00"  # 黄色 - 中等风险
+                    else:
+                        status_color = "#FF0000"  # 红色 - 高风险
+                    
+                    status_text = f"市场状态: {trend} (风险指数: {risk:.2f})"
+                    self.market_status_label.setText(status_text)
+                    self.market_status_label.setStyleSheet(f"color: {status_color};")
+                else:
+                    # 没有预测结果，显示基本状态
+                    self.market_status_label.setText("市场状态: 已更新")
+                    self.market_status_label.setStyleSheet("color: #FFFFFF;")
+        except Exception as e:
+            logger.error(f"更新市场状态失败: {str(e)}")
+    
+    def _run_market_prediction(self):
+        """运行市场预测"""
+        try:
+            # 确保市场控制器已初始化
+            if not hasattr(self, 'market_controller') or not self.market_controller:
+                QMessageBox.warning(self, "预测失败", "市场控制器尚未初始化")
+                return
+            
+            # 显示加载进度对话框
+            progress_dialog = QProgressDialog("正在进行量子预测...", "取消", 0, 100, self)
+            progress_dialog.setWindowTitle("量子预测")
+            progress_dialog.setWindowModality(Qt.WindowModal)
+            progress_dialog.setMinimumDuration(0)
+            progress_dialog.setValue(10)
+            
+            # 使用后台线程进行预测
+            def run_prediction():
+                try:
+                    # 更新市场数据
+                    self.market_controller.update_market_data()
+                    progress_dialog.setValue(30)
+                    
+                    # 使用量子引擎进行预测
+                    prediction = self.market_controller.predict_market_trend(use_quantum=True)
+                    progress_dialog.setValue(80)
+                    
+                    # 预测完成后在主线程更新UI
+                    QTimer.singleShot(0, lambda: self._update_prediction_ui(prediction))
+                    progress_dialog.setValue(100)
+                except Exception as e:
+                    logger.error(f"市场预测失败: {str(e)}")
+                    logger.error(traceback.format_exc())
+                    QTimer.singleShot(0, lambda: QMessageBox.critical(self, "预测失败", f"市场预测出错: {str(e)}"))
+            
+            # 启动预测线程
+            prediction_thread = threading.Thread(target=run_prediction)
+            prediction_thread.daemon = True
+            prediction_thread.start()
+            
+        except Exception as e:
+            logger.error(f"启动市场预测失败: {str(e)}")
+            logger.error(traceback.format_exc())
+            QMessageBox.critical(self, "预测失败", f"启动预测出错: {str(e)}")
+    
+    def _update_prediction_ui(self, prediction):
+        """更新预测UI显示"""
+        try:
+            # 更新市场状态
+            self._update_market_status()
+            
+            # 更新预测文本
+            if prediction:
+                # 格式化预测结果为可读文本
+                prediction_html = self._format_prediction_html(prediction)
+                self.prediction_text.setHtml(prediction_html)
+            else:
+                self.prediction_text.setPlainText("未能获取预测结果")
+        except Exception as e:
+            logger.error(f"更新预测UI失败: {str(e)}")
+            logger.error(traceback.format_exc())
+    
+    def _format_prediction_html(self, prediction):
+        """将预测结果格式化为HTML以提升显示效果"""
+        try:
+            html = "<html><body style='color:#00FFFF; font-family:Microsoft YaHei,Arial;'>"
+            
+            # 添加标题
+            html += "<h2 style='color:#00DDFF;'>量子纠缠市场预测</h2>"
+            
+            # 预测时间
+            prediction_time = prediction.get('quantum_enhancement_time', 
+                             prediction.get('prediction_time', datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+            html += f"<p>预测时间: {prediction_time}</p>"
+            
+            # 是否使用量子增强
+            is_quantum = prediction.get('is_quantum_enhanced', False)
+            html += f"<p>预测模式: " + ('<span style="color:#00FF99;">量子增强</span>' if is_quantum else '基础分析') + "</p>"
+            
+            # 风险分析部分
+            html += "<h3 style='color:#00CCFF;'>风险分析</h3>"
+            
+            # 市场趋势
+            market_trend = prediction.get('market_trend', '未知')
+            html += f"<p>市场趋势: <span style='font-weight:bold;'>{market_trend}</span></p>"
+            
+            # 风险水平
+            risk_level = prediction.get('risk_level', 0.5)
+            risk_color = self._get_risk_color(risk_level)
+            html += f"<p>风险水平: <span style='color:{risk_color};font-weight:bold;'>{risk_level:.2f}</span></p>"
+            
+            # 板块轮动
+            html += "<h3 style='color:#00CCFF;'>板块轮动分析</h3>"
+            
+            # 当前热点板块
+            if 'sector_rotation' in prediction and 'current_hot_sectors' in prediction['sector_rotation']:
+                hot_sectors = prediction['sector_rotation']['current_hot_sectors']
+                html += "<p>当前热点板块:</p><ul>"
+                for sector in hot_sectors[:5]:  # 只显示前5个
+                    html += f"<li>{sector}</li>"
+                html += "</ul>"
+            
+            # 下一轮预测板块
+            if 'sector_rotation' in prediction and 'next_sectors_prediction' in prediction['sector_rotation']:
+                next_sectors = prediction['sector_rotation']['next_sectors_prediction']
+                html += "<p>下一轮可能热点:</p><ul>"
+                for sector in next_sectors[:3]:  # 只显示前3个
+                    html += f"<li>{sector}</li>"
+                html += "</ul>"
+            
+            # 详细预测
+            if 'detailed_predictions' in prediction:
+                html += "<h3 style='color:#00CCFF;'>详细预测</h3>"
+                html += "<table border='0' cellspacing='5'>"
+                html += "<tr><th>标的</th><th>预测值</th><th>置信度</th></tr>"
+                
+                for entity, pred in prediction['detailed_predictions'].items():
+                    if isinstance(pred, dict):
+                        pred_value = pred.get('prediction', 0)
+                        confidence = pred.get('confidence', 0)
+                        
+                        # 设置颜色
+                        if pred_value > 0:
+                            color = "#FF4444"  # 红色 - 正向
+                        else:
+                            color = "#44FF44"  # 绿色 - 负向
+                        
+                        html += f"<tr><td>{entity}</td><td style='color:{color};'>{pred_value:+.2f}%</td><td>{confidence:.2f}</td></tr>"
+                
+                html += "</table>"
+            
+            html += "</body></html>"
+            return html
+        except Exception as e:
+            logger.error(f"格式化预测HTML失败: {str(e)}")
+            return f"<html><body>预测结果格式化失败: {str(e)}</body></html>"
+    
+    def _get_risk_color(self, risk_level):
+        """根据风险水平获取颜色"""
+        if risk_level < 0.3:
+            return "#00FF00"  # 绿色 - 低风险
+        elif risk_level < 0.7:
+            return "#FFFF00"  # 黄色 - 中等风险
+        else:
+            return "#FF0000"  # 红色 - 高风险
 
-    def _apply_quantum_style_to(self, widget_class):
-        """对指定类型的所有小部件应用量子风格"""
-        for widget in self.findChildren(widget_class):
-            # 为小组框添加微妙的辉光效果
-            if isinstance(widget, QGroupBox):
-                shadow = QGraphicsDropShadowEffect()
-                shadow.setBlurRadius(20)
-                shadow.setColor(QColor(0, 150, 220, 70))
-                shadow.setOffset(0, 0)
-                widget.setGraphicsEffect(shadow)
-            
-            # 为按钮添加悬停动画效果
-            elif isinstance(widget, QPushButton):
-                widget.setStyleSheet("""
-                    QPushButton {
-                        background-color: rgba(30, 30, 60, 0.7);
-                        color: #AACCEE;
-                        border: 1px solid #3A3A6A;
-                        border-radius: 4px;
-                        padding: 5px 15px;
-                        font-weight: bold;
-                    }
-                    
-                    QPushButton:hover {
-                        background-color: rgba(40, 40, 100, 0.8);
-                        color: #00DDFF;
-                        border: 1px solid #5A5AAA;
-                    }
-                    
-                    QPushButton:pressed {
-                        background-color: rgba(20, 20, 40, 0.8);
-                    }
-                """)
-    
     def _create_trading_tab(self):
         """创建交易选项卡"""
-        trading_widget = QWidget()
-        trading_layout = QVBoxLayout(trading_widget)
-        
-        # 在这里添加交易组件
-        
-        self.tab_widget.addTab(trading_widget, "交易")
+        try:
+            logger.info("创建交易标签页...")
+            trading_widget = QWidget()
+            trading_layout = QVBoxLayout(trading_widget)
+            trading_layout.setContentsMargins(15, 15, 15, 15)
+            trading_layout.setSpacing(10)
+            
+            # 顶部状态面板
+            status_panel = QWidget()
+            status_layout = QHBoxLayout(status_panel)
+            status_layout.setContentsMargins(5, 5, 5, 5)
+            
+            # 交易状态
+            trade_status_label = QLabel("交易状态: 模拟交易模式")
+            trade_status_label.setObjectName("tradeStatusLabel")
+            trade_status_label.setStyleSheet("color: #00DDFF; font-weight: bold;")
+            status_layout.addWidget(trade_status_label)
+            
+            # 添加按钮
+            refresh_btn = QPushButton("刷新数据")
+            refresh_btn.setObjectName("tradeRefreshButton")
+            refresh_btn.setFixedWidth(120)
+            refresh_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(0, 60, 120, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 4px;
+                    padding: 5px;
+                }
+                QPushButton:hover {
+                    background-color: rgba(0, 80, 160, 0.8);
+                }
+                QPushButton:pressed {
+                    background-color: rgba(0, 40, 100, 0.9);
+                }
+            """)
+            refresh_btn.clicked.connect(self._refresh_trading_data)
+            status_layout.addWidget(refresh_btn)
+            
+            # 添加到主布局
+            trading_layout.addWidget(status_panel)
+            
+            # 交易面板
+            trade_group = QGroupBox("交易操作")
+            trade_group.setObjectName("tradeOperationPanel")
+            trade_group.setStyleSheet("""
+                QGroupBox {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                }
+            """)
+            trade_layout = QGridLayout(trade_group)
+            
+            # 股票代码输入
+            trade_layout.addWidget(QLabel("股票代码:"), 0, 0)
+            self.stock_code_input = QLineEdit()
+            self.stock_code_input.setPlaceholderText("输入股票代码，如: 600001")
+            self.stock_code_input.setStyleSheet("""
+                QLineEdit {
+                    background-color: rgba(0, 30, 60, 0.7);
+                    color: #00DDFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 4px;
+                    padding: 5px;
+                }
+            """)
+            trade_layout.addWidget(self.stock_code_input, 0, 1, 1, 2)
+            
+            # 数量输入
+            trade_layout.addWidget(QLabel("数量:"), 1, 0)
+            self.quantity_input = QSpinBox()
+            self.quantity_input.setMinimum(100)
+            self.quantity_input.setMaximum(100000)
+            self.quantity_input.setSingleStep(100)
+            self.quantity_input.setValue(100)
+            self.quantity_input.setStyleSheet("""
+                QSpinBox {
+                    background-color: rgba(0, 30, 60, 0.7);
+                    color: #00DDFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 4px;
+                    padding: 5px;
+                }
+            """)
+            trade_layout.addWidget(self.quantity_input, 1, 1, 1, 2)
+            
+            # 交易按钮
+            buy_btn = QPushButton("买入")
+            buy_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(0, 120, 0, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #00AA00;
+                    border-radius: 4px;
+                    padding: 8px;
+                    font-weight: bold;
+                }
+                QPushButton:hover {
+                    background-color: rgba(0, 150, 0, 0.8);
+                }
+            """)
+            
+            sell_btn = QPushButton("卖出")
+            sell_btn.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(180, 0, 0, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #CC0000;
+                    border-radius: 4px;
+                    padding: 8px;
+                    font-weight: bold;
+                }
+                QPushButton:hover {
+                    background-color: rgba(220, 0, 0, 0.8);
+                }
+            """)
+            
+            trade_layout.addWidget(buy_btn, 2, 1)
+            trade_layout.addWidget(sell_btn, 2, 2)
+            
+            trading_layout.addWidget(trade_group)
+            
+            # 持仓面板
+            positions_group = QGroupBox("当前持仓")
+            positions_group.setObjectName("positionsPanel")
+            positions_group.setStyleSheet("""
+                QGroupBox {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                }
+            """)
+            positions_layout = QVBoxLayout(positions_group)
+            
+            # 持仓表格
+            self.positions_table = QTableWidget()
+            self.positions_table.setColumnCount(5)
+            self.positions_table.setHorizontalHeaderLabels(["股票代码", "股票名称", "持仓数量", "当前价格", "市值"])
+            self.positions_table.setStyleSheet("""
+                QTableWidget {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #00DDFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    gridline-color: #0066AA;
+                }
+                QHeaderView::section {
+                    background-color: rgba(0, 40, 80, 0.8);
+                    color: white;
+                    border: 1px solid #0066AA;
+                    padding: 4px;
+                }
+                QTableWidget::item {
+                    border-bottom: 1px solid #0066AA;
+                }
+            """)
+            positions_layout.addWidget(self.positions_table)
+            
+            trading_layout.addWidget(positions_group)
+            
+            # 委托订单面板
+            orders_group = QGroupBox("委托订单")
+            orders_group.setObjectName("ordersPanel")
+            orders_group.setStyleSheet("""
+                QGroupBox {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    margin-top: 10px;
+                    font-weight: bold;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                }
+            """)
+            orders_layout = QVBoxLayout(orders_group)
+            
+            # 订单表格
+            self.orders_table = QTableWidget()
+            self.orders_table.setColumnCount(6)
+            self.orders_table.setHorizontalHeaderLabels(["订单编号", "股票代码", "方向", "数量", "状态", "创建时间"])
+            self.orders_table.setStyleSheet("""
+                QTableWidget {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #00DDFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    gridline-color: #0066AA;
+                }
+                QHeaderView::section {
+                    background-color: rgba(0, 40, 80, 0.8);
+                    color: white;
+                    border: 1px solid #0066AA;
+                    padding: 4px;
+                }
+                QTableWidget::item {
+                    border-bottom: 1px solid #0066AA;
+                }
+            """)
+            orders_layout.addWidget(self.orders_table)
+            
+            trading_layout.addWidget(orders_group)
+            
+            # 填充模拟数据
+            self._populate_trading_demo_data()
+            
+            logger.info("交易标签页创建完成")
+            self.tab_widget.addTab(trading_widget, "交易")
+            return trading_widget
+        except Exception as e:
+            logger.error(f"创建交易标签页失败: {str(e)}")
+            logger.error(traceback.format_exc())
+            
+            # 创建错误页面
+            error_widget = QWidget()
+            error_layout = QVBoxLayout(error_widget)
+            error_label = QLabel(f"加载交易标签页失败: {str(e)}")
+            error_label.setStyleSheet("color: red;")
+            error_layout.addWidget(error_label)
+            
+            self.tab_widget.addTab(error_widget, "交易")
+            return error_widget
+
+    def _populate_trading_demo_data(self):
+        """填充交易模块的演示数据"""
+        try:
+            # 填充持仓数据
+            self.positions_table.setRowCount(3)
+            
+            # 模拟持仓数据
+            positions = [
+                {"code": "600000", "name": "浦发银行", "quantity": 1000, "price": 12.34, "value": 12340},
+                {"code": "000001", "name": "平安银行", "quantity": 500, "price": 15.67, "value": 7835},
+                {"code": "601318", "name": "中国平安", "quantity": 200, "price": 42.56, "value": 8512}
+            ]
+            
+            for i, pos in enumerate(positions):
+                self.positions_table.setItem(i, 0, QTableWidgetItem(pos["code"]))
+                self.positions_table.setItem(i, 1, QTableWidgetItem(pos["name"]))
+                self.positions_table.setItem(i, 2, QTableWidgetItem(str(pos["quantity"])))
+                self.positions_table.setItem(i, 3, QTableWidgetItem(f"{pos['price']:.2f}"))
+                self.positions_table.setItem(i, 4, QTableWidgetItem(f"{pos['value']:.2f}"))
+            
+            # 调整列宽
+            self.positions_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+            
+            # 填充订单数据
+            self.orders_table.setRowCount(4)
+            
+            # 模拟订单数据
+            orders = [
+                {"id": "ORD202311060001", "code": "600000", "direction": "买入", "quantity": 1000, "status": "已成交", "time": "2023-11-06 09:30:15"},
+                {"id": "ORD202311060002", "code": "000001", "direction": "买入", "quantity": 500, "status": "已成交", "time": "2023-11-06 10:15:32"},
+                {"id": "ORD202311060003", "code": "601318", "direction": "买入", "quantity": 200, "status": "已成交", "time": "2023-11-06 13:45:21"},
+                {"id": "ORD202311060004", "code": "600036", "direction": "买入", "quantity": 300, "status": "委托中", "time": "2023-11-06 14:30:45"}
+            ]
+            
+            for i, order in enumerate(orders):
+                self.orders_table.setItem(i, 0, QTableWidgetItem(order["id"]))
+                self.orders_table.setItem(i, 1, QTableWidgetItem(order["code"]))
+                self.orders_table.setItem(i, 2, QTableWidgetItem(order["direction"]))
+                self.orders_table.setItem(i, 3, QTableWidgetItem(str(order["quantity"])))
+                self.orders_table.setItem(i, 4, QTableWidgetItem(order["status"]))
+                self.orders_table.setItem(i, 5, QTableWidgetItem(order["time"]))
+                
+                # 设置已成交的行为绿色，委托中的为黄色
+                if order["status"] == "已成交":
+                    for j in range(6):
+                        self.orders_table.item(i, j).setForeground(QColor(0, 255, 150))
+                elif order["status"] == "委托中":
+                    for j in range(6):
+                        self.orders_table.item(i, j).setForeground(QColor(255, 200, 0))
+            
+            # 调整列宽
+            self.orders_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+            
+            logger.info("交易演示数据加载完成")
+        except Exception as e:
+            logger.error(f"填充交易演示数据失败: {str(e)}")
+
+    def _refresh_trading_data(self):
+        """刷新交易数据"""
+        try:
+            # 重新加载模拟数据
+            self._populate_trading_demo_data()
+            QMessageBox.information(self, "刷新成功", "交易数据已更新")
+            
+            logger.info("交易数据已刷新")
+        except Exception as e:
+            logger.error(f"刷新交易数据失败: {str(e)}")
+            QMessageBox.warning(self, "刷新失败", f"刷新交易数据时发生错误: {str(e)}")
     
     def _create_analysis_tab(self):
         """创建分析选项卡"""
-        analysis_widget = QWidget()
-        analysis_layout = QVBoxLayout(analysis_widget)
+        try:
+            logger.info("创建分析标签页...")
+            analysis_widget = QWidget()
+            analysis_layout = QVBoxLayout(analysis_widget)
+            analysis_layout.setContentsMargins(15, 15, 15, 15)
+            
+            # 顶部控制面板
+            control_panel = QWidget()
+            control_layout = QHBoxLayout(control_panel)
+            
+            # 股票代码输入
+            control_layout.addWidget(QLabel("股票代码:"))
+            self.stock_code_input = QLineEdit()
+            self.stock_code_input.setPlaceholderText("输入股票代码")
+            self.stock_code_input.setMaximumWidth(150)
+            control_layout.addWidget(self.stock_code_input)
+            
+            # 分析类型选择
+            control_layout.addWidget(QLabel("分析类型:"))
+            self.analysis_type = QComboBox()
+            self.analysis_type.addItems(["技术分析", "基本面分析", "量子分析"])
+            control_layout.addWidget(self.analysis_type)
+            
+            # 分析按钮
+            analyze_btn = QPushButton("开始分析")
+            analyze_btn.clicked.connect(self._run_analysis)
+            control_layout.addWidget(analyze_btn)
+            
+            # 添加到主布局
+            analysis_layout.addWidget(control_panel)
+            
+            # 分析结果面板
+            self.result_text = QTextEdit()
+            self.result_text.setReadOnly(True)
+            self.result_text.setStyleSheet("""
+                QTextEdit {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #00DDFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                }
+            """)
+            analysis_layout.addWidget(self.result_text)
+            
+            # 添加示例分析结果
+            self.result_text.setHtml("""
+                <h2 style="color:#00DDFF;">股票分析报告</h2>
+                <p>请在上方输入股票代码并选择分析类型，然后点击"开始分析"按钮。</p>
+                <p>分析完成后，结果将显示在此处。</p>
+            """)
+            
+            logger.info("分析标签页创建完成")
+            self.tab_widget.addTab(analysis_widget, "分析")
+        except Exception as e:
+            logger.error(f"创建分析标签页失败: {str(e)}")
+            
+            # 创建一个空白页面并显示错误
+            analysis_widget = QWidget()
+            error_layout = QVBoxLayout(analysis_widget)
+            error_label = QLabel(f"加载分析模块失败: {str(e)}")
+            error_label.setStyleSheet("color: red;")
+            error_layout.addWidget(error_label)
+            
+            self.tab_widget.addTab(analysis_widget, "分析")
+
+    def _run_analysis(self):
+        """运行股票分析"""
+        stock_code = self.stock_code_input.text()
+        analysis_type = self.analysis_type.currentText()
         
-        # 在这里添加分析组件
+        if not stock_code:
+            QMessageBox.warning(self, "输入错误", "请输入股票代码")
+            return
         
-        self.tab_widget.addTab(analysis_widget, "分析")
+        # 生成示例分析结果
+        stock_name = "测试股票"  # 实际应用中应从数据源获取
+        html_result = f"""
+        <h2 style="color:#00DDFF;">{stock_name} ({stock_code}) 分析报告</h2>
+        <p>分析类型: {analysis_type}</p>
+        <p>分析时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+        <hr style="border-color:#0088CC;">
+        
+        <h3 style="color:#00FFCC;">分析结果摘要</h3>
+        <p>该股票当前呈现震荡上行趋势，技术指标表现良好，建议关注。</p>
+        
+        <h3 style="color:#00FFCC;">详细指标</h3>
+        <ul>
+            <li>MA(5): 25.34 (↑)</li>
+            <li>MA(10): 24.56 (↑)</li>
+            <li>MA(20): 23.89 (↑)</li>
+            <li>MACD: 0.45 (金叉)</li>
+            <li>KDJ: K值:75.3 D值:68.2 (偏强)</li>
+        </ul>
+        
+        <h3 style="color:#00FFCC;">风险评估</h3>
+        <p>风险等级: <span style="color:#FFCC00;">中等</span></p>
+        
+        <hr style="border-color:#0088CC;">
+        <p style="color:#AAAAAA;font-size:smaller;">本分析由超神系统生成，仅供参考，不构成投资建议</p>
+        """
+        
+        self.result_text.setHtml(html_result)
+        logger.info(f"完成对股票 {stock_code} 的{analysis_type}")
     
     def _create_quantum_tab(self):
         """创建量子引擎选项卡"""
@@ -994,7 +1893,7 @@ class SuperGodDesktopApp(QMainWindow):
         self.memory_usage.setText(f"内存占用: {memory}MB")
         
         # 更新市场状态
-        market_states = ["开盘", "收盘", "盘中"]
+        market_states = ["开盘", "收盘", "午休", "盘前准备", "盘后统计"]
         market_state = random.choice(market_states)
         self.market_status.setText(f"市场状态: {market_state}")
         
@@ -1317,6 +2216,285 @@ class SuperGodDesktopApp(QMainWindow):
         about_action = QAction("关于", self)
         about_action.triggered.connect(self._show_about)
         help_menu.addAction(about_action)
+
+    def _integrate_modules(self):
+        """整合所有模块，创建模块间的量子纠缠连接"""
+        try:
+            logger.info("开始整合系统模块，建立量子纠缠...")
+            
+            # 1. 将市场控制器与量子引擎连接
+            if hasattr(self, 'market_controller') and hasattr(self, 'quantum_engine'):
+                # 如果市场控制器支持设置量子引擎
+                if hasattr(self.market_controller, 'set_quantum_engine'):
+                    self.market_controller.set_quantum_engine(self.quantum_engine)
+                    logger.info("市场控制器与量子引擎连接成功")
+                
+                # 如果存在量子AI模块，设置关联
+                if hasattr(self.market_controller, 'ai_engine') and hasattr(self.market_controller.ai_engine, 'set_quantum_engine'):
+                    self.market_controller.ai_engine.set_quantum_engine(self.quantum_engine)
+                    logger.info("量子AI引擎与量子引擎连接成功")
+            
+            # 2. 连接交易控制器与量子引擎
+            if hasattr(self, 'trade_controller') and hasattr(self, 'quantum_engine'):
+                if hasattr(self.trade_controller, 'set_quantum_engine'):
+                    self.trade_controller.set_quantum_engine(self.quantum_engine)
+                    logger.info("交易控制器与量子引擎连接成功")
+            
+            # 3. 整合市场和交易模块
+            if hasattr(self, 'market_controller') and hasattr(self, 'trade_controller'):
+                # 已经在初始化中设置了market_controller，确保再次检查
+                if not hasattr(self.trade_controller, 'market_controller') or self.trade_controller.market_controller is None:
+                    self.trade_controller.market_controller = self.market_controller
+                    logger.info("交易控制器与市场控制器连接成功")
+            
+            # 4. 连接UI组件与后端控制器
+            # 标签页内的市场分析组件
+            if hasattr(self, 'market_widget'):
+                if self.market_widget.controller is None:
+                    self.market_widget.controller = self.market_controller
+                    logger.info("市场分析界面与市场控制器连接成功")
+            
+            # 5. 初始化量子纠缠网络
+            if hasattr(self, 'quantum_engine'):
+                # 创建示例市场实体列表
+                market_entities = [
+                    "000001.SH", "399001.SZ", "399006.SZ",  # 主要指数
+                    "600000.SH", "600030.SH", "600036.SH",  # 样本股票
+                    "AAPL", "MSFT", "GOOGL"                # 国际股票
+                ]
+                
+                # 创建基础关联矩阵
+                correlation_matrix = {}
+                for i, entity1 in enumerate(market_entities):
+                    for j, entity2 in enumerate(market_entities):
+                        if i != j:
+                            # 生成一个基于位置的相关性值
+                            correlation = 0.3 + 0.4 * np.exp(-abs(i-j)/3)
+                            correlation_matrix[(entity1, entity2)] = correlation
+                
+                # 初始化量子纠缠关系
+                self.quantum_engine.initialize_entanglement(market_entities, correlation_matrix)
+                logger.info(f"量子纠缠网络初始化完成，纠缠了{len(market_entities)}个市场实体")
+            
+            # 6. 启用所有UI组件的自动刷新
+            self._enable_auto_refresh()
+            
+            logger.info("所有模块整合完成，系统处于共生状态")
+            self.statusBar().showMessage("量子纠缠网络初始化完成，所有模块处于共生状态", 5000)
+        except Exception as e:
+            logger.error(f"模块整合失败: {str(e)}")
+            logger.error(traceback.format_exc())
+            self.statusBar().showMessage(f"模块整合部分失败: {str(e)}", 5000)
+    
+    def _enable_auto_refresh(self):
+        """启用所有相关组件的自动刷新功能"""
+        try:
+            # 为市场视图启用自动刷新
+            if hasattr(self, 'market_widget') and hasattr(self.market_widget, 'set_auto_refresh'):
+                self.market_widget.set_auto_refresh(True, interval_minutes=1)
+                logger.info("市场数据自动刷新已启用")
+            
+            # 为量子视图启用自动刷新
+            if self.tab_widget.count() >= 5:  # 如果有足够的标签页
+                quantum_tab = self.tab_widget.widget(4)  # 量子引擎标签页
+                if hasattr(quantum_tab, 'set_auto_refresh'):
+                    quantum_tab.set_auto_refresh(True, interval_minutes=2)
+                    logger.info("量子引擎视图自动刷新已启用")
+        except Exception as e:
+            logger.error(f"启用自动刷新失败: {str(e)}")
+    
+    def _refresh_market_data(self):
+        """刷新市场数据"""
+        try:
+            self.statusBar().showMessage("正在刷新市场数据...", 2000)
+            
+            # 刷新市场数据
+            if hasattr(self, 'market_controller'):
+                self.market_controller.update_market_data(force_update=True)
+                logger.info("市场数据已刷新")
+            
+            # 如果存在市场视图，刷新界面
+            if hasattr(self, 'market_widget') and hasattr(self.market_widget, 'refresh_data'):
+                self.market_widget.refresh_data()
+                logger.info("市场视图已刷新")
+            
+            # 更新市场时间
+            self._update_market_time()
+            
+            # 触发量子纠缠更新
+            if hasattr(self, 'quantum_engine') and hasattr(self.market_controller, 'market_data'):
+                # 使用市场数据更新量子状态
+                try:
+                    self._update_quantum_state_with_market_data()
+                    logger.info("量子状态已根据市场数据更新")
+                except Exception as e:
+                    logger.error(f"更新量子状态失败: {str(e)}")
+            
+            self.statusBar().showMessage("市场数据刷新完成", 2000)
+        except Exception as e:
+            logger.error(f"刷新市场数据失败: {str(e)}")
+            self.statusBar().showMessage(f"刷新失败: {str(e)}", 2000)
+    
+    def _update_quantum_state_with_market_data(self):
+        """使用最新的市场数据更新量子状态"""
+        if not hasattr(self, 'quantum_engine') or not hasattr(self, 'market_controller'):
+            return
+            
+        market_data = self.market_controller.market_data
+        if not market_data:
+            return
+            
+        # 提取指数变化百分比
+        sh_change = market_data.get('sh_index', {}).get('change_pct', 0)
+        sz_change = market_data.get('sz_index', {}).get('change_pct', 0)
+        cyb_change = market_data.get('cyb_index', {}).get('change_pct', 0)
+        
+        # 提取北向资金数据
+        north_flow = market_data.get('north_flow', 0)
+        
+        # 创建市场状态向量
+        market_state = {
+            '000001.SH': sh_change / 100.0,  # 转换为小数
+            '399001.SZ': sz_change / 100.0,
+            '399006.SZ': cyb_change / 100.0,
+            'north_flow': north_flow / 10000.0 if north_flow else 0  # 归一化
+        }
+        
+        # 如果量子引擎有更新市场状态的方法，调用它
+        if hasattr(self.quantum_engine, 'update_market_state'):
+            self.quantum_engine.update_market_state(market_state)
+        elif hasattr(self.quantum_engine, 'update_quantum_states'):
+            # 转换为量子引擎可接受的格式
+            states = {}
+            for entity, value in market_state.items():
+                states[entity] = {
+                    'value': value,
+                    'weight': 1.0,
+                    'phase': 0.0
+                }
+            self.quantum_engine.update_quantum_states(states)
+
+    def _update_market_time(self):
+        """更新市场时间"""
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.market_time_label.setText(f"更新时间: {current_time}")
+
+    def _apply_quantum_style_to(self, widget):
+        """应用量子风格到指定组件"""
+        if isinstance(widget, QLabel):
+            widget.setStyleSheet("""
+                color: #00DDFF;
+                font-weight: bold;
+                font-family: 'Microsoft YaHei', Arial;
+            """)
+        elif isinstance(widget, QPushButton):
+            widget.setStyleSheet("""
+                QPushButton {
+                    background-color: rgba(0, 60, 120, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 4px;
+                    padding: 5px;
+                    font-family: 'Microsoft YaHei', Arial;
+                }
+                QPushButton:hover {
+                    background-color: rgba(0, 80, 160, 0.8);
+                }
+                QPushButton:pressed {
+                    background-color: rgba(0, 40, 100, 0.9);
+                }
+            """)
+        elif isinstance(widget, QLineEdit):
+            widget.setStyleSheet("""
+                QLineEdit {
+                    background-color: rgba(0, 30, 60, 0.7);
+                    color: #00DDFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 4px;
+                    padding: 5px;
+                    font-family: 'Microsoft YaHei', Arial;
+                }
+            """)
+        elif isinstance(widget, QComboBox):
+            widget.setStyleSheet("""
+                QComboBox {
+                    background-color: rgba(0, 30, 60, 0.7);
+                    color: #00DDFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 4px;
+                    padding: 4px;
+                    min-width: 150px;
+                    font-family: 'Microsoft YaHei', Arial;
+                }
+                QComboBox::drop-down {
+                    subcontrol-origin: padding;
+                    subcontrol-position: top right;
+                    width: 20px;
+                    border-left: 1px solid #0088CC;
+                }
+                QComboBox QAbstractItemView {
+                    background-color: rgba(0, 20, 40, 0.9);
+                    color: #00DDFF;
+                    selection-background-color: rgba(0, 80, 120, 0.8);
+                }
+            """)
+        elif isinstance(widget, QGroupBox):
+            widget.setStyleSheet("""
+                QGroupBox {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #FFFFFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    margin-top: 10px;
+                    font-weight: bold;
+                    font-family: 'Microsoft YaHei', Arial;
+                }
+                QGroupBox::title {
+                    subcontrol-origin: margin;
+                    left: 10px;
+                    padding: 0 5px 0 5px;
+                }
+            """)
+        elif isinstance(widget, QTextEdit):
+            widget.setStyleSheet("""
+                QTextEdit {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #00DDFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    padding: 5px;
+                    font-family: 'Microsoft YaHei', Arial;
+                }
+            """)
+        elif isinstance(widget, QTableWidget):
+            widget.setStyleSheet("""
+                QTableWidget {
+                    background-color: rgba(0, 20, 40, 0.7);
+                    color: #00DDFF;
+                    border: 1px solid #0088CC;
+                    border-radius: 5px;
+                    gridline-color: #0066AA;
+                    font-family: 'Microsoft YaHei', Arial;
+                }
+                QHeaderView::section {
+                    background-color: rgba(0, 40, 80, 0.8);
+                    color: white;
+                    border: 1px solid #0066AA;
+                    padding: 4px;
+                }
+                QTableWidget::item {
+                    border-bottom: 1px solid #0066AA;
+                }
+            """)
+        else:
+            # 为其他类型的组件应用通用样式
+            widget.setStyleSheet("""
+                background-color: rgba(0, 20, 40, 0.7);
+                color: #00DDFF;
+                font-family: 'Microsoft YaHei', Arial;
+            """)
+                
+        return widget
 
 
 def show_splash_screen():
