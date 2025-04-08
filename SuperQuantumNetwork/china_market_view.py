@@ -717,7 +717,7 @@ class ChinaMarketWidget(QWidget):
         """刷新市场数据"""
         if not self.controller:
             return
-        
+            
         # 检查缓存时间，如果距上次更新不足30秒，则使用缓存
         current_time = time.time()
         if current_time - self.last_update_time < 30 and self.cached_market_data:
@@ -892,7 +892,7 @@ class ChinaMarketWidget(QWidget):
         """运行市场预测"""
         if not self.controller:
             return
-        
+            
         # 检查缓存时间，如果距上次预测不足5分钟，则使用缓存
         current_time = time.time()
         cache_valid = (current_time - self.last_prediction_time < 300) and self.cached_prediction and self.cached_portfolio
@@ -1081,24 +1081,72 @@ class ChinaMarketWidget(QWidget):
 
 
 def create_market_view(main_window, tab_widget, controller=None):
-    """工厂函数：创建中国市场视图"""
+    """创建中国市场视图
+    
+    Args:
+        main_window: 主窗口
+        tab_widget: 标签页容器
+        controller: 市场数据控制器
+    
+    Returns:
+        创建的中国市场视图组件
+    """
     try:
-        # 创建标签页
-        market_tab = QWidget()
-        tab_widget.addTab(market_tab, "中国市场分析")
-        
-        # 设置布局
-        layout = QVBoxLayout(market_tab)
-        
-        # 创建市场组件
-        market_widget = ChinaMarketWidget(parent=market_tab, controller=controller)
-        layout.addWidget(market_widget)
-        
-        return True
+        market_widget = ChinaMarketWidget(parent=main_window, controller=controller)
+        return market_widget
     except Exception as e:
         logger.error(f"创建中国市场视图失败: {str(e)}")
         logger.error(traceback.format_exc())
-        return False
+        
+        # 创建一个简单的替代视图
+        fallback_widget = QWidget()
+        fallback_layout = QVBoxLayout(fallback_widget)
+        
+        # 错误信息
+        error_label = QLabel(f"加载中国市场分析组件失败: {str(e)}")
+        error_label.setStyleSheet("color: red;")
+        fallback_layout.addWidget(error_label)
+        
+        # 创建简单市场指数面板
+        indices_group = QGroupBox("市场指数")
+        indices_layout = QVBoxLayout(indices_group)
+        
+        # 添加一些示例数据
+        indices = [
+            {"name": "上证指数", "code": "000001.SH", "price": "3250.55", "change": "+0.75%"},
+            {"name": "深证成指", "code": "399001.SZ", "price": "10765.31", "change": "+1.25%"},
+            {"name": "创业板指", "code": "399006.SZ", "price": "2156.48", "change": "+1.56%"}
+        ]
+        
+        for index in indices:
+            index_widget = QWidget()
+            index_layout = QHBoxLayout(index_widget)
+            
+            name_label = QLabel(f"{index['name']} ({index['code']})")
+            index_layout.addWidget(name_label)
+            
+            price_label = QLabel(index['price'])
+            index_layout.addWidget(price_label)
+            
+            change_label = QLabel(index['change'])
+            if "+" in index['change']:
+                change_label.setStyleSheet("color: red;")
+            else:
+                change_label.setStyleSheet("color: green;")
+            index_layout.addWidget(change_label)
+            
+            indices_layout.addWidget(index_widget)
+        
+        fallback_layout.addWidget(indices_group)
+        
+        # 添加刷新按钮
+        refresh_btn = QPushButton("刷新市场数据")
+        fallback_layout.addWidget(refresh_btn)
+        
+        # 添加弹性空间
+        fallback_layout.addStretch(1)
+        
+        return fallback_widget
 
 
 if __name__ == "__main__":

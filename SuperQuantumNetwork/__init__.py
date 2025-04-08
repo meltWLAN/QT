@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 """
-超神系统 - 桌面版中国市场分析模块
+超神量子共生网络交易系统 - 核心包
 """
 
 import logging
 import os
 import sys
 
-# 设置版本信息
-__version__ = '1.0.0'
-__author__ = '超神系统开发团队'
+# 添加当前目录到路径
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+# 版本信息
+__version__ = "3.5.0"
+__author__ = "超神开发团队"
 
 # 确保日志目录存在
 log_dir = os.path.expanduser('~/超神系统/logs')
@@ -40,12 +43,26 @@ logging.basicConfig(
 # 创建日志对象
 logger = logging.getLogger('SuperQuantumNetwork')
 
+# 导出主要模块，使其可以通过相对导入访问
+try:
+    # 尝试导入核心模块
+    import quantum_view
+    import china_market_view
+    import market_controllers
+    import quantum_ai
+    import super_god_desktop_app
+    import dashboard_module
+except ImportError as e:
+    # 在导入失败时提供信息，但不会阻止包加载
+    logger.warning(f"导入超神系统模块时出现问题: {str(e)}")
+
 # 导入主要组件
 try:
-    from .china_market_view import ChinaMarketWidget, create_market_view
-    from .market_controllers import MarketDataController
-    from .data_sources import get_index_data, get_north_flow, get_sector_data, get_stock_data
-    from .quantum_ai import QuantumAIEngine, get_market_prediction
+    # 导入功能组件
+    from china_market_view import ChinaMarketWidget, create_market_view
+    from market_controllers import MarketDataController
+    from data_sources import get_index_data, get_north_flow, get_sector_data, get_stock_data
+    from quantum_ai import QuantumAIEngine, get_market_prediction
     
     __all__ = [
         'ChinaMarketWidget', 
@@ -89,4 +106,4 @@ def initialize_market_module(main_window, tab_widget):
         logger.error(f"初始化市场模块失败: {str(e)}")
         import traceback
         logger.error(traceback.format_exc())
-        return False 
+        return False

@@ -137,7 +137,7 @@ class QuantumStateVisualizer(QWidget):
             
             # 绘制状态标签
             painter.setPen(QColor(200, 200, 220))
-            painter.drawText(x + 10, y + 10, f"|ψ{i}>")
+            painter.drawText(int(x + 10), int(y + 10), f"|ψ{i}>")
 
 
 class EntanglementGraphWidget(QWidget):
@@ -248,7 +248,8 @@ class EntanglementGraphWidget(QWidget):
         
         # 绘制节点
         for node in self.nodes:
-            x, y = node['x'] * w, node['y'] * h
+            x = int(node['x'] * w)  # 转换为整数
+            y = int(node['y'] * h)  # 转换为整数
             base_size = node['size'] * min(w, h)
             pulse = node['pulse']
             
@@ -275,14 +276,14 @@ class EntanglementGraphWidget(QWidget):
             text_x = x - painter.fontMetrics().horizontalAdvance(node['name']) / 2
             text_y = y + size * 2 + 15
             
-            painter.drawText(text_x, text_y, node['name'])
+            painter.drawText(int(text_x), int(text_y), node['name'])
             
             # 绘制价值标签
             value_text = f"{node['value']:.2f}"
             val_width = painter.fontMetrics().horizontalAdvance(value_text)
             
             painter.setPen(QColor(r, g, b))
-            painter.drawText(x - val_width / 2, y - size * 2 - 5, value_text)
+            painter.drawText(int(x - val_width / 2), int(y - size * 2 - 5), value_text)
 
 
 class QuantumControlPanel(QGroupBox):
@@ -766,9 +767,9 @@ class QuantumNetworkVisualizer(QWidget):
             text_color = QColor(100, 200, 230)
         
         painter.setPen(text_color)
-        painter.drawText(margin, margin + 12, f"共振强度: {self.quantum_resonance:.3f}")
-        painter.drawText(margin, margin + 27, f"相干度: {self.coherence:.2f}")
-        painter.drawText(margin, margin + 42, f"纠缠数量: {self.entanglement_count}")
+        painter.drawText(int(margin), int(margin + 12), f"共振强度: {self.quantum_resonance:.3f}")
+        painter.drawText(int(margin), int(margin + 27), f"相干度: {self.coherence:.2f}")
+        painter.drawText(int(margin), int(margin + 42), f"纠缠数量: {self.entanglement_count}")
     
     def _draw_threshold_indicators(self, painter, width, height):
         """绘制临界阈值指示器"""
@@ -808,12 +809,12 @@ class QuantumNetworkVisualizer(QWidget):
         # 绘制阈值标签
         painter.setPen(QColor(255, 220, 50))
         painter.setFont(QFont("Arial", 8))
-        painter.drawText(threshold_x - 25, y_pos - 5, "临界阈值")
+        painter.drawText(int(threshold_x - 25), int(y_pos - 5), "临界阈值")
         
         # 绘制当前值
         painter.setPen(QColor(220, 220, 255))
         value_text = f"量子共振: {self.quantum_resonance:.3f}"
-        painter.drawText(margin + 5, y_pos + indicator_height - 5, value_text)
+        painter.drawText(int(margin + 5), int(y_pos + indicator_height - 5), value_text)
 
 
 class QuantumViewWidget(QWidget):
@@ -822,74 +823,140 @@ class QuantumViewWidget(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         
-        # 设置布局
-        layout = QVBoxLayout(self)
-        layout.setContentsMargins(15, 15, 15, 15)
-        layout.setSpacing(10)
+        self.setObjectName("quantumViewWidget")
         
-        # 顶部标题
-        title_layout = QHBoxLayout()
+        # 主布局
+        main_layout = QVBoxLayout(self)
+        main_layout.setContentsMargins(15, 15, 15, 15)
+        main_layout.setSpacing(10)
         
-        title = QLabel("量子引擎 - 预测与纠缠分析")
-        title.setFont(QFont("Arial", 16, QFont.Bold))
-        title.setStyleSheet("color: #00DDFF;")
-        title_layout.addWidget(title)
+        # 顶部状态面板
+        status_panel = QWidget()
+        status_layout = QHBoxLayout(status_panel)
+        status_layout.setContentsMargins(5, 5, 5, 5)
         
-        # 状态指示器
-        self.status_label = QLabel("● 运行中")
-        self.status_label.setStyleSheet("color: #00FF99; font-weight: bold;")
-        title_layout.addWidget(self.status_label)
+        self.time_label = QLabel("当前时间: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        self.time_label.setStyleSheet("color: #00DDFF;")
+        status_layout.addWidget(self.time_label)
         
-        title_layout.addStretch()
+        self.status_label = QLabel("量子引擎状态: 就绪")
+        self.status_label.setStyleSheet("color: #00FF88;")
+        status_layout.addWidget(self.status_label)
         
-        # 更新时间
-        self.time_label = QLabel(f"最后更新: {datetime.now().strftime('%H:%M:%S')}")
-        self.time_label.setStyleSheet("color: #AAAAEE;")
-        title_layout.addWidget(self.time_label)
+        status_layout.addStretch()
         
-        layout.addLayout(title_layout)
+        # 控制按钮
+        calculate_btn = QPushButton("运行量子计算")
+        calculate_btn.setFixedWidth(150)
+        calculate_btn.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(0, 60, 120, 0.7);
+                color: #FFFFFF;
+                border: 1px solid #0088CC;
+                border-radius: 4px;
+                padding: 8px;
+            }
+            QPushButton:hover {
+                background-color: rgba(0, 80, 160, 0.8);
+            }
+        """)
+        calculate_btn.clicked.connect(self._run_calculation)
+        status_layout.addWidget(calculate_btn)
+        
+        reset_btn = QPushButton("重置系统")
+        reset_btn.setFixedWidth(120)
+        reset_btn.setStyleSheet("""
+            QPushButton {
+                background-color: rgba(120, 0, 0, 0.7);
+                color: #FFFFFF;
+                border: 1px solid #CC0000;
+                border-radius: 4px;
+                padding: 8px;
+            }
+            QPushButton:hover {
+                background-color: rgba(160, 0, 0, 0.8);
+            }
+        """)
+        reset_btn.clicked.connect(self._reset_system)
+        status_layout.addWidget(reset_btn)
+        
+        main_layout.addWidget(status_panel)
+        
+        # 分屏布局 - 左侧为可视化，右侧为控制面板
+        content_splitter = QSplitter(Qt.Horizontal)
+        
+        # === 左侧量子可视化 ===
+        viz_group = QGroupBox("量子态可视化")
+        viz_group.setStyleSheet("""
+            QGroupBox {
+                background-color: rgba(0, 20, 40, 0.7);
+                color: #FFFFFF;
+                border: 1px solid #0088CC;
+                border-radius: 5px;
+                margin-top: 10px;
+                font-weight: bold;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+            }
+        """)
+        viz_layout = QVBoxLayout(viz_group)
+        
+        # 添加量子可视化组件
+        self.quantum_visualizer = QuantumStateVisualizer()
+        viz_layout.addWidget(self.quantum_visualizer)
+        
+        # 添加纠缠图
+        self.entanglement_graph = EntanglementGraphWidget()
+        viz_layout.addWidget(self.entanglement_graph)
+        
+        content_splitter.addWidget(viz_group)
+        
+        # === 右侧控制面板 ===
+        control_group = QGroupBox("量子系统控制")
+        control_group.setStyleSheet("""
+            QGroupBox {
+                background-color: rgba(0, 20, 40, 0.7);
+                color: #FFFFFF;
+                border: 1px solid #0088CC;
+                border-radius: 5px;
+                margin-top: 10px;
+                font-weight: bold;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px 0 5px;
+            }
+        """)
+        
+        control_layout = QVBoxLayout(control_group)
         
         # 添加控制面板
         self.control_panel = QuantumControlPanel()
-        layout.addWidget(self.control_panel)
+        control_layout.addWidget(self.control_panel)
         
-        # 创建选项卡
-        self.tabs = QTabWidget()
+        # 添加结果显示
+        self.results_widget = QuantumResultsWidget()
+        control_layout.addWidget(self.results_widget)
         
-        # 添加状态可视化选项卡
-        states_tab = QWidget()
-        states_layout = QVBoxLayout(states_tab)
-        self.state_viz = QuantumStateVisualizer()
-        states_layout.addWidget(self.state_viz)
-        self.tabs.addTab(states_tab, "量子态")
+        content_splitter.addWidget(control_group)
         
-        # 添加纠缠图选项卡
-        entangle_tab = QWidget()
-        entangle_layout = QVBoxLayout(entangle_tab)
-        self.entangle_viz = EntanglementGraphWidget()
-        entangle_layout.addWidget(self.entangle_viz)
-        self.tabs.addTab(entangle_tab, "纠缠网络")
+        # 设置初始分割大小
+        content_splitter.setSizes([int(self.width() * 0.6), int(self.width() * 0.4)])
         
-        # 添加选项卡到布局
-        layout.addWidget(self.tabs)
+        main_layout.addWidget(content_splitter)
         
-        # 添加结果表格
-        self.results = QuantumResultsWidget()
-        layout.addWidget(self.results)
-        
-        # 更新定时器
+        # 设置定时器更新时间
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._update_time)
         self.timer.start(1000)  # 每秒更新一次
-        
-        # 连接按钮信号
-        self.control_panel.run_button.clicked.connect(self._run_calculation)
-        self.control_panel.stop_button.clicked.connect(self._stop_calculation)
-        self.control_panel.reset_button.clicked.connect(self._reset_system)
     
     def _update_time(self):
         """更新时间"""
-        self.time_label.setText(f"最后更新: {datetime.now().strftime('%H:%M:%S')}")
+        self.time_label.setText("当前时间: " + datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
     
     def _run_calculation(self):
         """运行计算"""
@@ -914,115 +981,87 @@ class QuantumViewWidget(QWidget):
             self.control_panel.reset_button.setEnabled(True)
             
             # 更新结果
-            self.results._populate_random_data()
-    
-    def _stop_calculation(self):
-        """停止计算"""
-        if hasattr(self, 'calculation_timer') and self.calculation_timer.isActive():
-            self.calculation_timer.stop()
-            self.control_panel.run_button.setEnabled(True)
-            self.control_panel.reset_button.setEnabled(True)
+            self.results_widget._populate_random_data()
     
     def _reset_system(self):
         """重置系统"""
         self.control_panel.progress.setValue(0)
-        self.status_label.setText("● 就绪")
-        self.status_label.setStyleSheet("color: #FFAA33; font-weight: bold;")
+        self.status_label.setText("量子引擎状态: 就绪")
+        self.status_label.setStyleSheet("color: #00FF88;")
 
 
 def create_quantum_view(parent=None):
-    """创建量子视图"""
-    frame = QFrame(parent)
-    frame.setFrameShape(QFrame.StyledPanel)
-    frame.setStyleSheet("""
-        QFrame {
-            background-color: #070720;
-            border: 1px solid #1A1A40;
-            border-radius: 8px;
-        }
-    """)
+    """创建量子视图组件
     
-    # 添加阴影效果
-    shadow = QGraphicsDropShadowEffect(frame)
-    shadow.setBlurRadius(15)
-    shadow.setColor(QColor(0, 0, 0, 80))
-    shadow.setOffset(0, 0)
-    frame.setGraphicsEffect(shadow)
+    Args:
+        parent: 父组件
     
-    # 布局
-    layout = QVBoxLayout(frame)
-    layout.setContentsMargins(15, 15, 15, 15)
-    
-    # 添加标题
-    title = QLabel("量子纠缠网络实时视图")
-    title.setStyleSheet("color: #00DDFF; font-size: 18px; font-weight: bold;")
-    layout.addWidget(title)
-    
-    # 添加高精度模式标签
-    precision_label = QLabel("[ 高精度量子模式 ]")
-    precision_label.setStyleSheet("color: #50FFDD; font-size: 12px;")
-    precision_label.setAlignment(Qt.AlignRight)
-    layout.addWidget(precision_label)
-    
-    # 创建量子网络可视化
-    quantum_visualizer = QuantumNetworkVisualizer()
-    quantum_visualizer.setMinimumHeight(200)
-    layout.addWidget(quantum_visualizer)
-    
-    # 添加量子网络信息面板
-    info_frame = QFrame()
-    info_frame.setStyleSheet("background-color: #0A0A2A; border-radius: 5px;")
-    info_layout = QVBoxLayout(info_frame)
-    
-    # 添加关键指标
-    metrics_layout = QHBoxLayout()
-    
-    # 量子纠缠对数
-    entanglement_metric = create_metric_widget("纠缠实体对", "28", "#00DDFF")
-    metrics_layout.addWidget(entanglement_metric)
-    
-    # 量子相干度
-    coherence_metric = create_metric_widget("量子相干性", "87.2%", "#00FFAA")
-    metrics_layout.addWidget(coherence_metric)
-    
-    # 非局域性强度
-    nonlocality_metric = create_metric_widget("非局域强度", "高", "#AA99FF")
-    metrics_layout.addWidget(nonlocality_metric)
-    
-    # 临界熵值
-    entropy_metric = create_metric_widget("临界熵", "0.458", "#FFAA33")
-    metrics_layout.addWidget(entropy_metric)
-    
-    info_layout.addLayout(metrics_layout)
-    
-    # 添加提示信息
-    tip_label = QLabel("系统运行在量子共振预测模式，超临界状态将生成高精度市场预测")
-    tip_label.setStyleSheet("color: #AAAAEE; font-size: 11px; font-style: italic;")
-    tip_label.setAlignment(Qt.AlignCenter)
-    info_layout.addWidget(tip_label)
-    
-    layout.addWidget(info_frame)
-    
-    return frame
+    Returns:
+        创建好的量子视图组件
+    """
+    try:
+        quantum_view = QuantumViewWidget(parent)
+        return quantum_view
+    except Exception as e:
+        logger.error(f"创建量子视图组件失败: {str(e)}")
+        logger.error(traceback.format_exc())
+        
+        # 创建一个空白占位组件
+        empty_widget = QWidget(parent)
+        layout = QVBoxLayout(empty_widget)
+        error_label = QLabel(f"量子视图组件加载失败: {str(e)}")
+        error_label.setStyleSheet("color: red;")
+        layout.addWidget(error_label)
+        
+        return empty_widget
 
-def create_metric_widget(title, value, color):
-    """创建指标小部件"""
-    widget = QFrame()
-    widget.setStyleSheet(f"border: 1px solid {color}; border-radius: 5px;")
-    layout = QVBoxLayout(widget)
-    layout.setContentsMargins(8, 8, 8, 8)
+# 生成模拟量子数据
+def generate_quantum_data():
+    """生成模拟的量子分析数据
     
-    title_label = QLabel(title)
-    title_label.setStyleSheet("color: #BBBBEE; font-size: 11px;")
-    title_label.setAlignment(Qt.AlignCenter)
+    Returns:
+        量子分析数据字典
+    """
+    import random
     
-    value_label = QLabel(value)
-    value_label.setStyleSheet(f"color: {color}; font-size: 16px; font-weight: bold;")
-    value_label.setAlignment(Qt.AlignCenter)
+    # 生成基本数据
+    data = {
+        "entanglement_factor": random.uniform(0.2, 0.6),
+        "coherence": random.uniform(0.7, 0.98),
+        "decoherence_rate": random.uniform(0.01, 0.1),
+        "quantum_states": [],
+        "market_correlation": random.uniform(0.55, 0.85),
+        "prediction_confidence": random.uniform(0.65, 0.92),
+        "quantum_noise": random.uniform(0.02, 0.15),
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
     
-    layout.addWidget(title_label)
-    layout.addWidget(value_label)
+    # 生成量子态
+    for i in range(8):
+        state = {
+            "id": i,
+            "amplitude": random.uniform(0.5, 1.0),
+            "phase": random.uniform(0, 2 * math.pi),
+            "energy": random.uniform(0.1, 0.9),
+            "measurement_probability": random.uniform(0, 1.0)
+        }
+        data["quantum_states"].append(state)
     
-    widget.setFixedHeight(70)
+    # 生成预测结果
+    data["prediction"] = {
+        "market_trend": random.choice(["上涨", "下跌", "震荡"]),
+        "trend_strength": random.uniform(0.4, 0.9),
+        "optimal_sectors": [
+            {"name": "新能源", "score": random.uniform(0.7, 0.95)},
+            {"name": "半导体", "score": random.uniform(0.65, 0.9)},
+            {"name": "医药", "score": random.uniform(0.6, 0.85)}
+        ],
+        "quantum_indicators": {
+            "q1": random.uniform(-1, 1),
+            "q2": random.uniform(-1, 1),
+            "q3": random.uniform(-1, 1),
+            "q4": random.uniform(-1, 1)
+        }
+    }
     
-    return widget 
+    return data 
